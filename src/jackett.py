@@ -9,11 +9,12 @@ from urlparse import urlparse
 
 import xbmc
 import xbmcgui
-from elementum.provider import get_setting, log
+from elementum.provider import log
 
 import filter
 import utils
 from client import Jackett
+from utils import get_setting
 
 available_providers = 0
 special_chars = "()\"':.[]<>/\\?"
@@ -45,17 +46,18 @@ def search(payload, method="general"):
     p_dialog = xbmcgui.DialogProgressBG()
     p_dialog.create('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32602))
 
-    request_start_time = time.time()
-    results = search_jackett(payload, method)
-    request_end_time = time.time()
+    try:
+        request_start_time = time.time()
+        results = search_jackett(payload, method)
+        request_end_time = time.time()
+        request_time = round(request_end_time - request_start_time, 2)
 
-    p_dialog.close()
-    del p_dialog
+        log.debug("All results: %s" % repr(results))
 
-    log.debug("all results: %s" % repr(results))
-
-    request_time = round(request_end_time - request_start_time, 2)
-    log.info("Jackett returned %d results in %s seconds" % (len(results), request_time))
+        log.info("Jackett returned %d results in %s seconds" % (len(results), request_time))
+    finally:
+        p_dialog.close()
+        del p_dialog
 
     return results
 
@@ -87,26 +89,38 @@ def parse_payload(method, payload):
             payload["search_title"] = payload["titles"][kodi_language]
 
     if "search_title" not in payload:
-        payload["search_title"] = payload["title"]
+        payload["search_title"] = unicode.encode(payload["title"])
 
     return payload
 
 
 def filter_results(method, results):
+    log.debug("results before filtered: %s", repr(results))
+
     if get_setting('filter_keywords_enabled', bool):
         results = filter.keywords(results)
+        log.debug("results after filtering keywords: %s", repr(results))
 
     if get_setting('filter_size_enabled', bool):
         results = filter.size(method, results)
+        log.debug("results after filtering size: %s", repr(results))
 
     if get_setting('filter_include_resolution_enabled', bool):
         results = filter.resolution(results)
+        log.debug("results after filtering resolution: %s", repr(results))
 
     if get_setting('filter_include_release', bool):
         results = filter.release_type(results)
+        log.debug("results after filtering release type: %s", repr(results))
 
     if get_setting('filter_exclude_no_seed', bool):
         results = filter.seed(results)
+        log.debug("results after filter no seeds: %s", repr(results))
+
+    # todo remove dupes
+    # todo maybe rating and codec
+
+    log.debug("results after filtering: %s", repr(results))
 
     return results
 
@@ -119,16 +133,14 @@ def sort_results(results):
     # 3 "Balanced"
 
     if sort_by == 0:
-        res = utils.resolutions.keys()
-        sorted_results = sorted(results, key=lambda r: res.index(r["resolution"]), reverse=True)
+        sorted_results = sorted(results, key=lambda r: r["resolution"], reverse=True)
     elif sort_by == 1:
         sorted_results = sorted(results, key=lambda r: r['seeds'], reverse=True)
     elif sort_by == 2:
         sorted_results = sorted(results, key=lambda r: r['size'], reverse=True)
     else:
         # todo do something more advanced with the "balanced" option
-        res = utils.resolutions.keys()
-        sorted_results = sorted(results, key=lambda r: r["seeds"] * 3 * res.index(r["resolution"]), reverse=True)
+        sorted_results = sorted(results, key=lambda r: r["seeds"] * 3 * r["resolution"], reverse=True)
 
     return sorted_results
 
@@ -141,7 +153,7 @@ def search_jackett(payload, method):
 
     log.debug("Processing %s with Jackett" % method)
     if method == 'movie':
-        res = jackett.search_movie(payload["search_title"], payload["imdb_id"])
+        res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
         res = jackett.search_season(payload["search_title"], payload["season"], payload["imdb_id"])
     elif method == 'episode':
@@ -149,6 +161,7 @@ def search_jackett(payload, method):
     elif method == 'anime':
         log.warning("jackett provider does not yet support anime search")
         res = []
+        log.info("anime payload={}".format(repr(payload)))
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
     else:
         res = jackett.search_query(payload["search_title"])

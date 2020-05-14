@@ -6,7 +6,10 @@ from collections import OrderedDict
 import xbmc
 import xbmcaddon
 import xbmcgui
+from elementum.provider import get_setting as original_get_settings
 from elementum.provider import log
+
+_plugin_setting_prefix = "elementum.jackett."
 
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo("id")
@@ -20,14 +23,17 @@ PATH_TEMP = xbmc.translatePath("special://temp")
 if not ADDON_PATH:
     ADDON_PATH = '..'
 
+#         resolutions['filter_240p'] = [u'240[pр]', u'vhs\-?rip']
+
 resolutions = OrderedDict([
-    ('240p', [r'240[p]', r'vhs\-?rip']),
+    ('4k', [r'4k', r'2160[p]', r'uhd', r'4k', r'hd4k']),
+    ('2k', [r'1440[p]', r'2k']),
+    ('1080p', [r'1080[ip]', r'1920x1080', r'hd1080p?', r'fullhd', r'fhd', r'blu\W*ray', r'bd\W*remux']),
+    ('720p', [r'720[p]', r'1280x720', r'hd720p?', r'hd\-?rip', r'b[rd]rip']),
     ('480p', [r'480[p]', r'xvid', r'dvd', r'dvdrip', r'hdtv', r'web\-(dl)?rip', r'iptv', r'sat\-?rip',
               r'tv\-?rip']),
-    ('720p', [r'720[p]', r'1280x720', r'hd720p?', r'hd\-?rip', r'b[rd]rip']),
-    ('1080p', [r'1080[ip]', r'1920x1080', r'hd1080p?', r'fullhd', r'fhd', r'blu\W*ray', r'bd\W*remux']),
-    ('2k', [r'1440[p]', r'2k']),
-    ('4k', [r'4k', r'2160[p]', r'uhd', r'4k', r'hd4k']),
+    ('240p', [r'240[p]', r'vhs\-?rip']),
+    ('unknown', []),
 ])
 
 _release_types = OrderedDict([
@@ -90,3 +96,7 @@ def _search_re_keys(name, re_dict, log_msg, default=""):
 
     log.warning("Could not determine %s from filename '%s'", log_msg, name)
     return default
+
+
+def get_setting(key, converter=str, choices=None):
+    return original_get_settings(_plugin_setting_prefix + key, converter, choices)

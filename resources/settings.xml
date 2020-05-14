@@ -2,72 +2,82 @@
 <settings>
   <!-- General -->
   <category label="32000">
-    <setting label="32001" type="text" id="host" default="http://localhost:9117" />
-    <setting label="32002" type="text" id="api_key" />
+    <setting label="32001" type="text" id="elementum.jackett.host" default="http://localhost:9117" />
+    <setting label="32002" type="text" id="elementum.jackett.api_key" />
     <!--<setting label="32003" type="action" action="RunScript(my.addon.id, downloadreport)"/>-->
   </category>
 
   <!-- Filtering -->
-  <category label="32200">
-    <setting label="32201" type="lsep" />
-    <setting label="32202" id="sort_by" type="enum" lvalues="32203|32204|32205|32206" default="3" />
-    <setting label="32207" id="filter_exclude_no_seed" type="bool" default="true" /> <!--todo update language-->
+  <category label="32050">
+    <setting label="32051" type="lsep" />
+    <setting label="32052" id="elementum.jackett.sort_by" type="enum" lvalues="32053|32054|32055|32056" default="3" />
+    <setting label="32057" id="elementum.jackett.filter_exclude_no_seed" type="bool" default="true" /> <!--todo update language-->
 
-    <setting label="32200" type="lsep"/>
-    <setting label="32201" id="filter_keywords_enabled" type="bool" default="false" />
+    <setting label="32100" type="lsep"/>
+    <setting label="32101" id="elementum.jackett.filter_keywords_enabled" type="bool" default="false" />
     <setting type="sep"/>
     <!--
     todo maybe add this:
      Use underscores around keywords to require a space/dot, eg. _HEVC_
-     <setting label="32037" id="filtering_help" type="text" enable="false" visible="eq(-2,true)" />
+     <setting label="32037" id="elementum.jackett.filtering_help" type="text" enable="false" visible="eq(-2,true)" />
     -->
-    <setting label="32202" id="keywords_block" type="text" default="" visible="eq(-2,true)" />
-    <setting label="32203" id="keywords_require" type="text" default="" visible="eq(-3,true)" />
+    <setting label="32102" id="elementum.jackett.keywords_block" type="text" default="" visible="eq(-2,true)" />
+    <setting label="32103" id="elementum.jackett.keywords_require" type="text" default="" visible="eq(-3,true)" />
 
-    <setting label="32300" type="lsep"/>
-    <setting label="32301" id="filter_size_enabled" type="bool" default="false" />
+    <setting label="32150" type="lsep"/>
+    <setting label="32151" id="elementum.jackett.filter_size_enabled" type="bool" default="false" />
     <setting type="sep"/>
-    <setting label="32302" id="size_include_unknown" type="bool" default="true" visible="eq(-2,true)" />
-    <setting label="32303" id="size_min" type="slider" option="float" range="0,0.25,100" default="0" visible="eq(-3,true)" />
-    <setting label="32304" id="size_max" type="slider" option="float" range="1,1,200" default="100" visible="eq(-4,true)" />
-    <setting label="32305" id="size_movies_min" type="slider" option="float" range="0,0.25,100" default="0.5" visible="eq(-5,true)" />
-    <setting label="32306" id="size_movies_max" type="slider" option="float" range="1,1,200" default="30" visible="eq(-6,true)" />
-    <setting label="32307" id="size_season_min" type="slider" option="float" range="0,0.5,100" default="0.5" visible="eq(-7,true)" />
-    <setting label="32308" id="size_season_max" type="slider" option="float" range="1,1,200" default="10" visible="eq(-8,true)" />
-    <setting label="32309" id="size_episode_min" type="slider" option="float" range="0,0.1,100" default="0" visible="eq(-9,true)" />
-    <setting label="32310" id="size_episode_max" type="slider" option="float" range="1,0.1,200" default="1" visible="eq(-10,true)" />
+    <setting label="32152" id="elementum.jackett.size_include_unknown" type="bool" default="true" visible="eq(-2,true)" />
+    <setting label="32153" id="elementum.jackett.size_min" type="slider" option="float" range="0,0.25,100" default="0" visible="eq(-3,true)" />
+    <setting label="32154" id="elementum.jackett.size_max" type="slider" option="float" range="1,1,200" default="100" visible="eq(-4,true)" />
+    <setting label="32155" id="elementum.jackett.size_movies_min" type="slider" option="float" range="0,0.25,100" default="0.5" visible="eq(-5,true)" />
+    <setting label="32156" id="elementum.jackett.size_movies_max" type="slider" option="float" range="1,1,200" default="30" visible="eq(-6,true)" />
+    <setting label="32157" id="elementum.jackett.size_season_min" type="slider" option="float" range="0,0.5,100" default="0.5" visible="eq(-7,true)" />
+    <setting label="32158" id="elementum.jackett.size_season_max" type="slider" option="float" range="1,1,200" default="10" visible="eq(-8,true)" />
+    <setting label="32159" id="elementum.jackett.size_episode_min" type="slider" option="float" range="0,0.1,100" default="0" visible="eq(-9,true)" />
+    <setting label="32160" id="elementum.jackett.size_episode_max" type="slider" option="float" range="1,0.1,200" default="1" visible="eq(-10,true)" />
 
-    <setting label="32400" type="lsep"/>
-    <setting label="32401" id="filter_include_resolution_enabled" type="bool" default="true" />
+    <setting label="32200" type="lsep"/>
+    <setting label="32201" id="elementum.jackett.filter_include_resolution_enabled" type="bool" default="true" />
     <setting type="sep"/>
-    <setting label="32402" id="include_resolution_4k" type="bool" default="true" visible="eq(-2,true)" />
-    <setting label="32403" id="include_resolution_2k" type="bool" default="true" visible="eq(-3,true)" />
-    <setting label="32404" id="include_resolution_1080p" type="bool" default="true" visible="eq(-4,true)" />
-    <setting label="32405" id="include_resolution_720p" type="bool" default="true" visible="eq(-5,true)" />
-    <setting label="32406" id="include_resolution_480p" type="bool" default="true" visible="eq(-6,true)" />
-    <setting label="32407" id="include_resolution_240p" type="bool" default="false" visible="eq(-7,true)" />
-    <setting label="32408" id="include_resolution_unknown" type="bool" default="false" visible="eq(-8,true)" />
+    <setting label="32202" id="elementum.jackett.include_resolution_4k" type="bool" default="true" visible="eq(-2,true)" />
+    <setting label="32203" id="elementum.jackett.include_resolution_2k" type="bool" default="true" visible="eq(-3,true)" />
+    <setting label="32204" id="elementum.jackett.include_resolution_1080p" type="bool" default="true" visible="eq(-4,true)" />
+    <setting label="32205" id="elementum.jackett.include_resolution_720p" type="bool" default="true" visible="eq(-5,true)" />
+    <setting label="32206" id="elementum.jackett.include_resolution_480p" type="bool" default="true" visible="eq(-6,true)" />
+    <setting label="32207" id="elementum.jackett.include_resolution_240p" type="bool" default="false" visible="eq(-7,true)" />
+    <setting label="32208" id="elementum.jackett.include_resolution_unknown" type="bool" default="true" visible="eq(-8,true)" />
 
-    <setting label="32500" type="lsep"/>
-    <setting label="32501" id="filter_include_release" type="bool" default="true" />
+    <setting label="32250" type="lsep"/>
+    <setting label="32251" id="elementum.jackett.filter_include_release" type="bool" default="true" />
     <setting type="sep"/>
-    <setting label="32502" id="include_release_brrip" type="bool" default="true" visible="eq(-2,true)"/>
-    <setting label="32503" id="include_release_webdl" type="bool" default="true" visible="eq(-3,true)"/>
-    <setting label="32504" id="include_release_hdrip" type="bool" default="true" visible="eq(-4,true)"/>
-    <setting label="32505" id="include_release_hdtv" type="bool" default="true" visible="eq(-5,true)"/>
-    <setting label="32506" id="include_release_dvd" type="bool" default="true" visible="eq(-6,true)"/>
-    <setting label="32507" id="include_release_h26x" type="bool" default="true" visible="eq(-7,true)"/>
-    <setting label="32508" id="include_release_dvdscr" type="bool" default="true" visible="eq(-8,true)"/>
-    <setting label="32509" id="include_release_screener" type="bool" default="true" visible="eq(-9,true)"/>
-    <setting label="32510" id="include_release_3d" type="bool" default="false" visible="eq(-10,true)"/>
-    <setting label="32511" id="include_release_telesync" type="bool" default="false" visible="eq(-11,true)"/>
-    <setting label="32512" id="include_release_cam" type="bool" default="false" visible="eq(-12,true)"/>
-    <setting label="32513" id="include_release_tvrip" type="bool" default="true" visible="eq(-13,true)"/>
-    <setting label="32514" id="include_release_iptvrip" type="bool" default="true" visible="eq(-14,true)"/>
-    <setting label="32515" id="include_release_vhsrip" type="bool" default="false" visible="eq(-15,true)"/>
-    <setting label="32516" id="include_release_trailer" type="bool" default="false" visible="eq(-16,true)"/>
-    <setting label="32517" id="include_release_workprint" type="bool" default="false" visible="eq(-17,true)"/>
-    <setting label="32518" id="include_release_line" type="bool" default="false" visible="eq(-18,true)"/>
-    <setting label="32519" id="include_release_unknown" type="bool" default="false" visible="eq(-19,true)"/>
+    <setting label="32252" id="elementum.jackett.include_release_brrip" type="bool" default="true" visible="eq(-2,true)"/>
+    <setting label="32253" id="elementum.jackett.include_release_webdl" type="bool" default="true" visible="eq(-3,true)"/>
+    <setting label="32254" id="elementum.jackett.include_release_hdrip" type="bool" default="true" visible="eq(-4,true)"/>
+    <setting label="32255" id="elementum.jackett.include_release_hdtv" type="bool" default="true" visible="eq(-5,true)"/>
+    <setting label="32256" id="elementum.jackett.include_release_dvd" type="bool" default="true" visible="eq(-6,true)"/>
+    <setting label="32257" id="elementum.jackett.include_release_h26x" type="bool" default="true" visible="eq(-7,true)"/>
+    <setting label="32258" id="elementum.jackett.include_release_dvdscr" type="bool" default="true" visible="eq(-8,true)"/>
+    <setting label="32259" id="elementum.jackett.include_release_screener" type="bool" default="true" visible="eq(-9,true)"/>
+    <setting label="32260" id="elementum.jackett.include_release_3d" type="bool" default="false" visible="eq(-10,true)"/>
+    <setting label="32261" id="elementum.jackett.include_release_telesync" type="bool" default="false" visible="eq(-11,true)"/>
+    <setting label="32262" id="elementum.jackett.include_release_cam" type="bool" default="false" visible="eq(-12,true)"/>
+    <setting label="32263" id="elementum.jackett.include_release_tvrip" type="bool" default="true" visible="eq(-13,true)"/>
+    <setting label="32264" id="elementum.jackett.include_release_iptvrip" type="bool" default="true" visible="eq(-14,true)"/>
+    <setting label="32265" id="elementum.jackett.include_release_vhsrip" type="bool" default="false" visible="eq(-15,true)"/>
+    <setting label="32266" id="elementum.jackett.include_release_trailer" type="bool" default="false" visible="eq(-16,true)"/>
+    <setting label="32267" id="elementum.jackett.include_release_workprint" type="bool" default="false" visible="eq(-17,true)"/>
+    <setting label="32268" id="elementum.jackett.include_release_line" type="bool" default="false" visible="eq(-18,true)"/>
+    <setting label="32269" id="elementum.jackett.include_release_unknown" type="bool" default="true" visible="eq(-19,true)"/>
+  </category>
+
+  <!-- Advanced -->
+  <category label="32300">
+    <setting label="32301" type="lsep"/>
+    <setting label="32302" type="bool" id="elementum.jackett.enable_debugger" default="false" />
+    <!--todo might need to add an option for directories-->
+    <setting label="32303" type="file" id="elementum.jackett.debugger_additional_libraries" default="" visible="eq(-1,true)" />
+    <setting label="32304" type="text" id="elementum.jackett.debugger_host" default="localhost" visible="eq(-2,true)" />
+    <setting label="32305" type="text" id="elementum.jackett.debugger_port" default="5678" visible="eq(-3,true)" />
   </category>
 </settings>

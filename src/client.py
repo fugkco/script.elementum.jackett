@@ -7,6 +7,7 @@ from urlparse import urljoin
 from elementum.provider import log
 from requests_toolbelt import sessions
 
+from src import utils
 from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type
 
 
@@ -74,7 +75,7 @@ class Jackett(object):
 
         # todo maybe categories are needed?
 
-    def search_movie(self, title, imdb_id):
+    def search_movie(self, title, year, imdb_id):
         if "search_tags" not in self._caps:
             notify(translation(32701), image=get_icon_path())
             return []
@@ -84,12 +85,12 @@ class Jackett(object):
             notify(translation(32702).format("movie"), image=get_icon_path())
             log.warning("Jackett has no movie capabilities, please add a indexer that has movie capabilities. "
                         "Falling back to query search...")
-            return self.search_query(title)
+            return self.search_query(title + u' ' + year)
 
         # todo what values are possible for imdb_id?
         movie_params = movie_search_caps["params"]
         request_params = {
-            "t": "tvsearch",
+            "t": "movie",
             "apikey": self._api_key
         }
         if imdb_id and 'imdbid' in movie_params:
@@ -124,8 +125,10 @@ class Jackett(object):
             "apikey": self._api_key
         }
         if imdb_id and 'imdbid' in tv_params:
+            log.debug("searching tv show with imdb id {}".format(imdb_id))
             request_params["imdbid"] = imdb_id
         else:
+            log.debug("searching tv show with query={}, season={}, episode={}".format(title, season, episode))
             request_params["q"] = title
             if bool(season) and 'season' in tv_params:
                 request_params["season"] = season
@@ -142,7 +145,6 @@ class Jackett(object):
 
     def search_query(self, query):
         request_params = {
-            "t": "tvsearch",
             "apikey": self._api_key,
             "q": query
         }
@@ -151,6 +153,11 @@ class Jackett(object):
 
     def _do_search_request(self, request_params):
         search_resp = self._session.get("all/results/torznab", params=request_params)
+
+        censored_params = request_params
+        censored_params['apikey'] = "{}{}{}".format(censored_params['apikey'][0:2],  "*" * 26, censored_params['apikey'][-4:])
+        log.debug('Making a request to Jackett using params %s', repr(censored_params))
+
         if search_resp.status_code != httplib.OK:
             log.error("Jackett return {}", search_resp.reason)
             return
@@ -186,15 +193,23 @@ class Jackett(object):
             tag = ref.tag
             attrib = ref.attrib
             if tag == "{" + self._torznab_ns + "}attr":
-                if "name" in attrib and "value" in attrib and attrib["name"] and attrib["value"] and \
+                val = attrib["value"]
+                if isinstance(val, str):
+                    val = val.decode("utf-8")
+                if "name" in attrib and "value" in attrib and attrib["name"] and val and \
                         attrib["name"] in self._torznab_elementum_mappings["torznab_attrs"]:
                     json = self._torznab_elementum_mappings["torznab_attrs"][attrib["name"]]
-                    result[json] = attrib["value"]
+                    result[json] = val
                 continue
 
             if ref.tag in self._torznab_elementum_mappings["tags"] and ref.text is not None:
                 json = self._torznab_elementum_mappings["tags"][ref.tag]
-                result[json] = ref.text.strip()
+                val = ref.text.strip()
+
+                if isinstance(val, str):
+                    val = val.decode("utf-8")
+
+                result[json] = val
 
         if result["name"] is None or result["uri"] is None:
             return None
@@ -202,7 +217,9 @@ class Jackett(object):
         # result["name"] = result["name"].decode("utf-8") # might be needed for non-english items
         result["seeds"] = int(result["seeds"])
         result["peers"] = int(result["peers"])
-        result["resolution"] = get_resolution(result["name"])
+        resolution = get_resolution(result["name"])
+        result["resolution"] = utils.resolutions.keys()[::-1].index(resolution)
+        result["_resolution"] = resolution
         result["release_type"] = get_release_type(result["name"])
 
         if result["size"] != "Unknown":

@@ -5,31 +5,33 @@ GIT_USER = fugkco
 GIT_REPOSITORY = script.elementum.jackett
 VERSION = $(shell sed -ne "s/.*COLOR\]\"\sversion=\"\([0-9a-z\.\-]*\)\".*/\1/p" addon.xml)
 ZIP_SUFFIX = zip
-ZIP_FILE = $(NAME)-$(VERSION).$(ZIP_SUFFIX)
+ZIP_FILE = $(NAME).$(ZIP_SUFFIX)
 
-all: deps-prod clean zip
+all: clean deps-prod locales zip
+
+.PHONY: build-prod
+build-prod: clean deps-prod $(ZIP_FILE)
 
 deps-prod:
-	@pipenv --rm || true
-	@pipenv install
-	@pipenv run pip freeze | pipenv run pip install --upgrade -r /dev/stdin --target resources/libs
+	@poetry export -f requirements.txt | \
+		poetry run pip install \
+			--requirement /dev/stdin \
+			--target $(NAME)/resources/libs \
+			--progress-bar off \
+			--install-option="--install-scripts=$$(mktemp -d)"
 
 deps-dev:
-	@pipenv --rm
-	@pipenv install --dev
+	@poetry install
 
-$(ZIP_FILE):
-	$(GIT) archive --format zip --prefix $(NAME)/ --output $(ZIP_FILE) HEAD
+$(ZIP_FILE): deps-prod
+	$(GIT) archive --format zip --worktree-attributes --prefix $(NAME)/ --output $(ZIP_FILE) HEAD
+	@zip -u -r $(ZIP_FILE) $(NAME)/resources/libs -x "*.pyc" -x "**/*.egg-info/*"
 	rm -rf $(NAME)
 
 zip: $(ZIP_FILE)
 
-clean_arch:
-	 rm -f $(ZIP_FILE)
-
 clean:
 	rm -f $(ZIP_FILE)
-	rm -rf $(NAME)
 
 locales:
 	scripts/xgettext_merge.sh

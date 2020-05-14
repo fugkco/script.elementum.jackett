@@ -1,6 +1,6 @@
 # coding=utf-8
-from elementum.provider import get_setting
-
+from utils import get_setting
+from elementum.provider import log
 
 #
 #
@@ -108,11 +108,18 @@ def size(method, results):
 
 
 def resolution(results):
-    return [
-        result
-        for result in results
-        if get_setting('include_resolution_' + result["resolution"], bool)
-    ]
+    filtered = []
+    for result in results:
+        log.info("res %s: name=%s; id=%d", result['name'], result['_resolution'], result['resolution'])
+        if get_setting('include_resolution_' + result["_resolution"], bool):
+            filtered.append(result)
+
+    return filtered
+    # return [
+    #     result
+    #     for result in results
+    #     if get_setting('include_resolution_' + result["_resolution"], bool)
+    # ]
 
 
 def seed(results):
@@ -129,12 +136,3 @@ def release_type(results):
         for result in results
         if get_setting('include_release_' + result["release_type"], bool)
     ]
-
-
-if __name__ == '__main__':
-    from client import Jackett
-
-    jackett = Jackett(host="http://127.0.0.1:9117/", api_key="qq2ix66989dr8i5j17c8o4acwac7nm85")
-    # jackett.search_movie("bad boys for life", "tt1502397")
-    results = jackett.search_shows("harley quinn", 2, 2, "tt7658402")
-    pass

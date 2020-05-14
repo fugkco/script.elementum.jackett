@@ -35,40 +35,100 @@ msgctxt "#32003"
 msgid "Validate Jackett settings"
 msgstr ""
 
-msgctxt "#32200"
+msgctxt "#32050"
 msgid "Filtering"
 msgstr ""
 
-msgctxt "#32201"
+msgctxt "#32051"
 msgid "General"
 msgstr ""
 
-msgctxt "#32202"
+msgctxt "#32052"
 msgid "Sort returned results by"
 msgstr ""
 
-msgctxt "#32203"
+msgctxt "#32053"
 msgid "Resolution"
 msgstr ""
 
-msgctxt "#32204"
+msgctxt "#32054"
 msgid "Seeds"
 msgstr ""
 
-msgctxt "#32205"
+msgctxt "#32055"
 msgid "Size"
 msgstr ""
 
-msgctxt "#32206"
+msgctxt "#32056"
 msgid "Balanced"
 msgstr ""
 
-msgctxt "#32207"
+msgctxt "#32057"
 msgid "Allow results without seeds"
 msgstr ""
 
-msgctxt "#32200"
+msgctxt "#32100"
 msgid "Filter Keywords"
+msgstr ""
+
+msgctxt "#32101"
+msgid "Enable"
+msgstr ""
+
+msgctxt "#32102"
+msgid "Block"
+msgstr ""
+
+msgctxt "#32103"
+msgid "Require"
+msgstr ""
+
+msgctxt "#32150"
+msgid "Filter Size"
+msgstr ""
+
+msgctxt "#32151"
+msgid "Enable"
+msgstr ""
+
+msgctxt "#32152"
+msgid "Include unknown file size"
+msgstr ""
+
+msgctxt "#32153"
+msgid "Min Size (GB)"
+msgstr ""
+
+msgctxt "#32154"
+msgid "Min Size (GB)"
+msgstr ""
+
+msgctxt "#32155"
+msgid "Min Movie Size (GB)"
+msgstr ""
+
+msgctxt "#32156"
+msgid "Max Movie Size (GB)"
+msgstr ""
+
+msgctxt "#32157"
+msgid "Min Season Size (GB)"
+msgstr ""
+
+msgctxt "#32158"
+msgid "Max Season Size (GB)"
+msgstr ""
+
+msgctxt "#32159"
+msgid "Min Episode Size (GB)"
+msgstr ""
+
+msgctxt "#32160"
+msgid "Max Episode Size (GB)"
+msgstr ""
+
+msgctxt "#32200"
+msgid "Filter Resolution"
 msgstr ""
 
 msgctxt "#32201"
@@ -76,171 +136,135 @@ msgid "Enable"
 msgstr ""
 
 msgctxt "#32202"
-msgid "Block"
-msgstr ""
-
-msgctxt "#32203"
-msgid "Require"
-msgstr ""
-
-msgctxt "#32300"
-msgid "Filter Size"
-msgstr ""
-
-msgctxt "#32301"
-msgid "Enable"
-msgstr ""
-
-msgctxt "#32302"
-msgid "Include unknown file size"
-msgstr ""
-
-msgctxt "#32303"
-msgid "Min Size (GB)"
-msgstr ""
-
-msgctxt "#32304"
-msgid "Min Size (GB)"
-msgstr ""
-
-msgctxt "#32305"
-msgid "Min Movie Size (GB)"
-msgstr ""
-
-msgctxt "#32306"
-msgid "Max Movie Size (GB)"
-msgstr ""
-
-msgctxt "#32307"
-msgid "Min Season Size (GB)"
-msgstr ""
-
-msgctxt "#32308"
-msgid "Max Season Size (GB)"
-msgstr ""
-
-msgctxt "#32309"
-msgid "Min Episode Size (GB)"
-msgstr ""
-
-msgctxt "#32310"
-msgid "Max Episode Size (GB)"
-msgstr ""
-
-msgctxt "#32400"
-msgid "Filter Resolution"
-msgstr ""
-
-msgctxt "#32401"
-msgid "Enable"
-msgstr ""
-
-msgctxt "#32402"
 msgid "4K/2160p"
 msgstr ""
 
-msgctxt "#32403"
+msgctxt "#32203"
 msgid "2K/1440p"
 msgstr ""
 
-msgctxt "#32404"
+msgctxt "#32204"
 msgid "1080p"
 msgstr ""
 
-msgctxt "#32405"
+msgctxt "#32205"
 msgid "720p"
 msgstr ""
 
-msgctxt "#32406"
+msgctxt "#32206"
 msgid "480p"
 msgstr ""
 
-msgctxt "#32407"
+msgctxt "#32207"
 msgid "240p"
 msgstr ""
 
-msgctxt "#32408"
+msgctxt "#32208"
 msgid "Unknown"
 msgstr ""
 
-msgctxt "#32500"
+msgctxt "#32250"
 msgid "Filter Release Type"
 msgstr ""
 
-msgctxt "#32501"
+msgctxt "#32251"
 msgid "Enable"
 msgstr ""
 
-msgctxt "#32502"
+msgctxt "#32252"
 msgid "BRRip/BDRip/Bluray"
 msgstr ""
 
-msgctxt "#32503"
+msgctxt "#32253"
 msgid "WebDL/WebRip"
 msgstr ""
 
-msgctxt "#32504"
+msgctxt "#32254"
 msgid "HDRip"
 msgstr ""
 
-msgctxt "#32505"
+msgctxt "#32255"
 msgid "HDTV"
 msgstr ""
 
-msgctxt "#32506"
+msgctxt "#32256"
 msgid "DVDRip"
 msgstr ""
 
-msgctxt "#32507"
+msgctxt "#32257"
 msgid "h26x"
 msgstr ""
 
-msgctxt "#32508"
+msgctxt "#32258"
 msgid "DVDScr"
 msgstr ""
 
-msgctxt "#32509"
+msgctxt "#32259"
 msgid "Screener/SCR"
 msgstr ""
 
-msgctxt "#32510"
+msgctxt "#32260"
 msgid "3D"
 msgstr ""
 
-msgctxt "#32511"
+msgctxt "#32261"
 msgid "TeleSync/TS/TC"
 msgstr ""
 
-msgctxt "#32512"
+msgctxt "#32262"
 msgid "Cam/HDCam"
 msgstr ""
 
-msgctxt "#32513"
+msgctxt "#32263"
 msgid "TVRip/SATRip"
 msgstr ""
 
-msgctxt "#32514"
+msgctxt "#32264"
 msgid "IPTVRip"
 msgstr ""
 
-msgctxt "#32515"
+msgctxt "#32265"
 msgid "VHSRip"
 msgstr ""
 
-msgctxt "#32516"
+msgctxt "#32266"
 msgid "Trailer"
 msgstr ""
 
-msgctxt "#32517"
+msgctxt "#32267"
 msgid "Workprint"
 msgstr ""
 
-msgctxt "#32518"
+msgctxt "#32268"
 msgid "Line"
 msgstr ""
 
-msgctxt "#32519"
+msgctxt "#32269"
 msgid "Unknown"
+msgstr ""
+
+msgctxt "#32300"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#32301"
+msgid "Debugger"
+msgstr ""
+
+msgctxt "#32302"
+msgid "Enable"
+msgstr ""
+
+msgctxt "#32303"
+msgid "Additional libraries to include"
+msgstr ""
+
+msgctxt "#32304"
+msgid "Host"
+msgstr ""
+
+msgctxt "#32305"
+msgid "Port"
 msgstr ""
 
 msgctxt "#32600"
