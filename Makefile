@@ -10,7 +10,7 @@ ZIP_FILE = $(NAME)-$(VERSION).$(ZIP_SUFFIX)
 all: deps-prod clean zip
 
 deps-prod:
-	@pipenv --rm
+	@pipenv --rm || true
 	@pipenv install
 	@pipenv run pip freeze | pipenv run pip install --upgrade -r /dev/stdin --target resources/libs
 
