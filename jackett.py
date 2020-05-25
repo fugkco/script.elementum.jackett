@@ -2,13 +2,13 @@
 import os
 import sys
 
+from elementum.provider import register, log
+
 from src import debugger
+from src.jackett import search
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resources', 'libs'))
 sys.path.insert(0, os.path.dirname(__file__))
-
-from src.jackett import search
-from elementum.provider import register, log
 
 
 def search_movie(payload):

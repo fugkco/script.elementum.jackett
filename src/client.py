@@ -155,7 +155,8 @@ class Jackett(object):
         search_resp = self._session.get("all/results/torznab", params=request_params)
 
         censored_params = request_params
-        censored_params['apikey'] = "{}{}{}".format(censored_params['apikey'][0:2],  "*" * 26, censored_params['apikey'][-4:])
+        censored_key = censored_params['apikey']
+        censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
         log.debug('Making a request to Jackett using params %s', repr(censored_params))
 
         if search_resp.status_code != httplib.OK:

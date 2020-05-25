@@ -1,6 +1,8 @@
 # coding=utf-8
-from utils import get_setting
 from elementum.provider import log
+
+from utils import get_setting
+
 
 #
 #
