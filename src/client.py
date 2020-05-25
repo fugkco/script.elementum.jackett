@@ -53,13 +53,13 @@ class Jackett(object):
 
         if caps_resp.status_code != httplib.OK:
             notify(translation(32700).format(caps_resp.reason), image=get_icon_path())
-            log.error("Jackett return {}", caps_resp.reason)
+            log.error("Jackett return %s", caps_resp.reason)
             return
 
         err = self.get_error(caps_resp.content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
-            log.error("got code {}: {}", err["code"], err["description"])
+            log.error("got code %s: %s", err["code"], err["description"])
             return
 
         xml = ET.ElementTree(ET.fromstring(caps_resp.content)).getroot()
@@ -73,6 +73,7 @@ class Jackett(object):
                 "params": [p for p in type_tag.attrib['supportedParams'].split(",") if p],
             }
 
+        log.info("Found capabilities: %s", repr(self._caps))
         # todo maybe categories are needed?
 
     def search_movie(self, title, year, imdb_id):
@@ -125,10 +126,10 @@ class Jackett(object):
             "apikey": self._api_key
         }
         if imdb_id and 'imdbid' in tv_params:
-            log.debug("searching tv show with imdb id {}".format(imdb_id))
+            log.debug("searching tv show with imdb id %s", imdb_id)
             request_params["imdbid"] = imdb_id
         else:
-            log.debug("searching tv show with query={}, season={}, episode={}".format(title, season, episode))
+            log.debug("searching tv show with query=%s, season=%s, episode=%s", title, season, episode)
             request_params["q"] = title
             if bool(season) and 'season' in tv_params:
                 request_params["season"] = season
@@ -144,6 +145,12 @@ class Jackett(object):
         return self.search_shows(title, season=season, episode=episode, imdb_id=imdb_id)
 
     def search_query(self, query):
+        if not self._caps["search_tags"]['search']:
+            notify(translation(32702).format("show"), image=get_icon_path())  # todo
+            log.warning("Jackett has no search capabilities, please add a indexer that has search capabilities.")
+
+            return []
+
         request_params = {
             "apikey": self._api_key,
             "q": query
@@ -152,15 +159,14 @@ class Jackett(object):
         return self._do_search_request(request_params)
 
     def _do_search_request(self, request_params):
-        search_resp = self._session.get("all/results/torznab", params=request_params)
-
         censored_params = request_params
         censored_key = censored_params['apikey']
         censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
         log.debug('Making a request to Jackett using params %s', repr(censored_params))
 
+        search_resp = self._session.get("all/results/torznab", params=request_params)
         if search_resp.status_code != httplib.OK:
-            log.error("Jackett return {}", search_resp.reason)
+            log.error("Jackett return %s", search_resp.reason)
             return
 
         return self._parse_items(search_resp.content)

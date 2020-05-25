@@ -32,8 +32,8 @@ def get_jacket_client():
         utils.notify(utils.translation(32601), image=utils.get_icon_path())
         return None
     else:
-        log.debug("jackett host: {}".format(host))
-        log.debug("jackett api_key: {}{}{}".format(api_key[0:2], "*" * 26, api_key[-4:]))
+        log.debug("jackett host: %s", host)
+        log.debug("jackett api_key: %s%s%s", api_key[0:2], "*" * 26, api_key[-4:])
 
     return Jackett(host=host.geturl(), api_key=api_key)
 
@@ -161,7 +161,7 @@ def search_jackett(payload, method):
     elif method == 'anime':
         log.warning("jackett provider does not yet support anime search")
         res = []
-        log.info("anime payload={}".format(repr(payload)))
+        log.info("anime payload=%s", repr(payload))
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
     else:
         res = jackett.search_query(payload["search_title"])
