@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
 import httplib
+import re
 import xml.etree.ElementTree as ET
 from urlparse import urljoin
 
@@ -8,7 +9,7 @@ from elementum.provider import log
 from requests_toolbelt import sessions
 
 from src import utils
-from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type
+from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting
 
 
 # import logging
@@ -108,16 +109,26 @@ class Jackett(object):
 
         tv_search_caps = self._caps["search_tags"]['tv-search']
         if not tv_search_caps['enabled']:
-            notify(translation(32702).format("show"), image=get_icon_path())  # todo
+            notify(translation(32702).format("show"), image=get_icon_path())
             log.warning("Jackett has no tvsearch capabilities, please add a indexer that has tvsearch capabilities. "
                         "Falling back to query search...")
 
+            title_ep = title
             if bool(season):
-                title = title + " S{:0>2}".format(season)
+                title_ep = "{} S{:0>2}".format(title_ep, season)
                 if bool(episode):
-                    title = title + "E{:0>2}".format(episode)
+                    title_ep = "{}E{:0>2}".format(title_ep, episode)
 
-            return self.search_query(title)
+            results = self.search_query(title_ep)
+            if get_setting("search_season_on_episode", bool) and bool(season) and bool(episode):
+                season_query = re.escape("{:0>2}".format(season))
+                results = results + [
+                    result
+                    for result in self.search_query("{} S{}".format(title, season_query))
+                    if re.search(r'\bS' + season_query + r'\b', result['name'], re.IGNORECASE)
+                ]
+
+            return results
 
         # todo what values are possible for imdb_id?
         tv_params = tv_search_caps["params"]
@@ -136,7 +147,17 @@ class Jackett(object):
             if bool(episode) and 'ep' in tv_params:
                 request_params["ep"] = episode
 
-        return self._do_search_request(request_params)
+        results = self._do_search_request(request_params)
+        if get_setting("search_season_on_episode", bool) and 'season' in request_params and 'ep' in request_params:
+            del request_params['ep']
+            season_query = re.escape("{:0>2}".format(season))
+            results = results + [
+                result
+                for result in self._do_search_request(request_params)
+                if re.search(r'\bS' + season_query + r'\b', result['name'], re.IGNORECASE)
+            ]
+
+        return results
 
     def search_season(self, title, season, imdb_id):
         return self.search_shows(title, season=season, imdb_id=imdb_id)
@@ -159,7 +180,7 @@ class Jackett(object):
         return self._do_search_request(request_params)
 
     def _do_search_request(self, request_params):
-        censored_params = request_params
+        censored_params = request_params.copy()
         censored_key = censored_params['apikey']
         censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
         log.debug('Making a request to Jackett using params %s', repr(censored_params))
@@ -168,6 +189,17 @@ class Jackett(object):
         if search_resp.status_code != httplib.OK:
             log.error("Jackett return %s", search_resp.reason)
             return
+
+        err = self.get_error(search_resp.content)
+        if err is not None:
+            notify(translation(32700).format(err["description"]), image=get_icon_path())
+            log.error("got code %s: %s", err["code"], err["description"])
+            return
+
+        log.debug("Jackett returned below response")
+        log.debug("===============================")
+        log.debug(search_resp.content)
+        log.debug("===============================")
 
         return self._parse_items(search_resp.content)
 

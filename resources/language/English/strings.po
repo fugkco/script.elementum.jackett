@@ -66,6 +66,10 @@ msgctxt "#32057"
 msgid "Allow results without seeds"
 msgstr ""
 
+msgctxt "#32058"
+msgid "When looking for an episode, do a secondary search for season"
+msgstr ""
+
 msgctxt "#32100"
 msgid "Filter Keywords"
 msgstr ""
