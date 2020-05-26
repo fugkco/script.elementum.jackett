@@ -25,7 +25,7 @@ deps-dev:
 
 $(ZIP_FILE): deps-prod
 	$(GIT) archive --format zip --worktree-attributes --prefix $(NAME)/ --output $(ZIP_FILE) HEAD
-	@zip -u -r $(ZIP_FILE) $(NAME)/resources/libs -x "*.pyc" -x "**/*.egg-info/*"
+	@zip -u -r $(ZIP_FILE) $(NAME)/resources/libs -x "*.pyc" -x "*.pyo" -x "**/*.egg-info/*"
 	rm -rf $(NAME)
 
 zip: $(ZIP_FILE)
