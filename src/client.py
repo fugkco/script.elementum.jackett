@@ -172,9 +172,8 @@ class Jackett(object):
 
     def search_query(self, query):
         if not self._caps["search_tags"]['search']:
-            notify(translation(32702).format("show"), image=get_icon_path())  # todo
+            notify(translation(32702).format("query"), image=get_icon_path())
             log.warning("Jackett has no search capabilities, please add a indexer that has search capabilities.")
-
             return []
 
         request_params = {
@@ -192,14 +191,15 @@ class Jackett(object):
 
         search_resp = self._session.get("all/results/torznab", params=request_params)
         if search_resp.status_code != httplib.OK:
-            log.error("Jackett return %s", search_resp.reason)
-            return
+            notify(translation(32700).format(search_resp.reason), image=get_icon_path())
+            log.error("Jackett returned %s", search_resp.reason)
+            return []
 
         err = self.get_error(search_resp.content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
             log.error("got code %s: %s", err["code"], err["description"])
-            return
+            return []
 
         log.debug("Jackett returned below response")
         log.debug("===============================")

@@ -23,6 +23,7 @@ special_chars = "()\"':.[]<>/\\?"
 def get_client():
     host = urlparse(get_setting('host'))
     if host.netloc == '' or host.scheme == '':
+        log.warning("Host %s is invalid. Can't return anything", get_setting('host'))
         utils.notify(utils.translation(32600), image=utils.get_icon_path())
         return None
 
