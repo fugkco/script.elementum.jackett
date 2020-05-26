@@ -57,8 +57,8 @@ _release_types = OrderedDict([
 ])
 
 
-def get_icon_path():
-    return os.path.join(ADDON_PATH, 'icon.png')
+def get_icon_path(icon='icon.png'):
+    return os.path.join(ADDON_PATH, 'resources', 'images', icon)
 
 
 def translation(id_value):

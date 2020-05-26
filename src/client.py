@@ -223,7 +223,10 @@ class Jackett(object):
             "peers": "0",
             "info_hash": "",
             "language": None,
-            "icon": "icons/1337x.png",  # todo
+
+            # todo would be nice to assign correct icons but that can be very time consuming due to the next
+            #  of indexers in Jackett
+            "icon": get_icon_path(),
 
             "_size_bytes": -1
         }
