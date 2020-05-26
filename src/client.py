@@ -9,7 +9,8 @@ from elementum.provider import log
 from requests_toolbelt import sessions
 
 from src import utils
-from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting
+from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
+    set_setting
 
 
 # import logging
@@ -55,13 +56,17 @@ class Jackett(object):
         if caps_resp.status_code != httplib.OK:
             notify(translation(32700).format(caps_resp.reason), image=get_icon_path())
             log.error("Jackett return %s", caps_resp.reason)
+            set_setting('settings_validated', caps_resp.reason)
             return
 
         err = self.get_error(caps_resp.content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
             log.error("got code %s: %s", err["code"], err["description"])
+            set_setting('settings_validated', err["description"])
             return
+
+        set_setting('settings_validated', 'Success')
 
         xml = ET.ElementTree(ET.fromstring(caps_resp.content)).getroot()
 

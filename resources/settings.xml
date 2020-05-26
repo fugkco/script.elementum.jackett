@@ -4,7 +4,8 @@
   <category label="32000">
     <setting label="32001" type="text" id="elementum.jackett.host" default="http://localhost:9117" />
     <setting label="32002" type="text" id="elementum.jackett.api_key" />
-    <!--<setting label="32003" type="action" action="RunScript(my.addon.id, downloadreport)"/>-->
+    <setting label="32003" type="text" id="elementum.jackett.settings_validated" default="" enable="false" />
+    <setting label="32004" type="action" action="RunScript(script.elementum.jackett, validate_settings)" option="close" />
   </category>
 
   <!-- Filtering -->

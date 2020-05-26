@@ -98,5 +98,9 @@ def _search_re_keys(name, re_dict, log_msg, default=""):
     return default
 
 
+def set_setting(key, value):
+    ADDON.setSetting(_plugin_setting_prefix + key, str(value))
+
+
 def get_setting(key, converter=str, choices=None):
     return original_get_settings(_plugin_setting_prefix + key, converter, choices)

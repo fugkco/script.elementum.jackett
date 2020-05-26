@@ -31,7 +31,19 @@ msgid "API Key"
 msgstr ""
 
 msgctxt "#32003"
-msgid "Validate Jackett settings"
+msgid "Jackett settings valid"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Validate settings"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Validating..."
+msgstr ""
+
+msgctxt "#32006"
+msgid "Successfully connected to Jackett"
 msgstr ""
 
 msgctxt "#32050"
@@ -296,4 +308,8 @@ msgstr ""
 
 msgctxt "#32702"
 msgid "Jackett is unable to search by {}, falling back to query search"
+msgstr ""
+
+msgctxt "#32800"
+msgid "This addon is a provider for Elementum. Nothing to do for me..."
 msgstr ""

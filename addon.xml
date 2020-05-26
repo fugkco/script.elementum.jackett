@@ -15,7 +15,7 @@
         <website>https://github.com/fugkco/script.elementum.jackett</website>
         <source>https://github.com/fugkco/script.elementum.jackett</source>
         <assets>
-            <icon>resources/images/kodi/icon.png</icon>
+            <icon>resources/images/icon.png</icon>
         </assets>
     </extension>
 </addon>

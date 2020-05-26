@@ -20,7 +20,7 @@ available_providers = 0
 special_chars = "()\"':.[]<>/\\?"
 
 
-def get_jacket_client():
+def get_client():
     host = urlparse(get_setting('host'))
     if host.netloc == '' or host.scheme == '':
         utils.notify(utils.translation(32600), image=utils.get_icon_path())
@@ -36,6 +36,19 @@ def get_jacket_client():
         log.debug("jackett api_key: %s%s%s", api_key[0:2], "*" * 26, api_key[-4:])
 
     return Jackett(host=host.geturl(), api_key=api_key)
+
+
+def validate_client():
+    p_dialog = xbmcgui.DialogProgressBG()
+    try:
+        p_dialog.create('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32005))
+        get_client()
+        if get_setting("settings_validated") == "Success":
+            utils.notify(utils.translation(32006), image=utils.get_icon_path())
+        utils.ADDON.openSettings()
+    finally:
+        p_dialog.close()
+        del p_dialog
 
 
 def search(payload, method="general"):
@@ -146,7 +159,7 @@ def sort_results(results):
 
 
 def search_jackett(payload, method):
-    jackett = get_jacket_client()
+    jackett = get_client()
     if jackett is None:
         utils.notify(utils.translation(32603), image=utils.get_icon_path())
         return []
