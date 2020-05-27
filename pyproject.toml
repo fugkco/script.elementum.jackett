@@ -13,6 +13,7 @@ requests-toolbelt = "^0.9.1"
 [tool.poetry.dev-dependencies]
 kodistubs = "^18.0.0"
 flake8 = "^3.8.2"
+pytest = "^4.6.10"
 
 [build-system]
 requires = ["poetry>=0.12"]

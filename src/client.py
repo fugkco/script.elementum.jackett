@@ -4,6 +4,7 @@ import httplib
 import re
 import xml.etree.ElementTree as ET
 from urlparse import urljoin
+from xml.etree import ElementTree
 
 from elementum.provider import log
 from requests_toolbelt import sessions
@@ -127,11 +128,7 @@ class Jackett(object):
             results = self.search_query(title_ep)
             if get_setting("search_season_on_episode", bool) and bool(season) and bool(episode):
                 season_query = re.escape("{:0>2}".format(season))
-                results = results + [
-                    result
-                    for result in self.search_query("{} S{}".format(title, season_query))
-                    if re.search(r'\bS' + season_query + r'\b', result['name'], re.IGNORECASE)
-                ]
+                results = results + self._filter_season(self.search_query("{} S{}".format(title, season_query)), season)
 
             return results
 
@@ -155,14 +152,16 @@ class Jackett(object):
         results = self._do_search_request(request_params)
         if get_setting("search_season_on_episode", bool) and 'season' in request_params and 'ep' in request_params:
             del request_params['ep']
-            season_query = re.escape("{:0>2}".format(season))
-            results = results + [
-                result
-                for result in self._do_search_request(request_params)
-                if re.search(r'\bS' + season_query + r'\b', result['name'], re.IGNORECASE)
-            ]
+            results = results + self._filter_season(self._do_search_request(request_params), season)
 
         return results
+
+    def _filter_season(self, results, season):
+        season_query = re.escape("{:0>2}".format(season))
+        return [
+            result for result in results
+            if re.search(r'\bS(eason )?' + season_query + r'\b', result['name'], re.IGNORECASE)
+        ]
 
     def search_season(self, title, season, imdb_id):
         return self.search_shows(title, season=season, imdb_id=imdb_id)
@@ -211,7 +210,9 @@ class Jackett(object):
     def _parse_items(self, resp_content):
         results = []
         xml = ET.ElementTree(ET.fromstring(resp_content))
-        for item in xml.getroot().findall("channel/item"):
+        items = xml.getroot().findall("channel/item")
+        log.info("Found %d items from response", len(items))
+        for item in items:
             result = self._parse_item(item)
             if result is not None:
                 results.append(result)
@@ -229,7 +230,7 @@ class Jackett(object):
             "info_hash": "",
             "language": None,
 
-            # todo would be nice to assign correct icons but that can be very time consuming due to the next
+            # todo would be nice to assign correct icons but that can be very time consuming due to the number
             #  of indexers in Jackett
             "icon": get_icon_path(),
 
@@ -259,6 +260,8 @@ class Jackett(object):
                 result[json] = val
 
         if result["name"] is None or result["uri"] is None:
+            log.warning("Could not parse item; name = %s; uri = %s", result["name"], result["uri"])
+            log.debug("Failed item is: %s", ElementTree.tostring(item, encoding='utf8'))
             return None
 
         # result["name"] = result["name"].decode("utf-8") # might be needed for non-english items

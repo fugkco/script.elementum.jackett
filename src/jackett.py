@@ -165,7 +165,7 @@ def search_jackett(payload, method):
         utils.notify(utils.translation(32603), image=utils.get_icon_path())
         return []
 
-    log.debug("Processing %s with Jackett" % method)
+    log.debug("Processing %s with Jackett", method)
     if method == 'movie':
         res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
@@ -179,6 +179,8 @@ def search_jackett(payload, method):
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
     else:
         res = jackett.search_query(payload["search_title"])
+
+    log.debug("%s search returned %d results", method, len(res))
 
     res = filter_results(method, res)
 
