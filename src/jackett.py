@@ -103,7 +103,8 @@ def parse_payload(method, payload):
             payload["search_title"] = payload["titles"][kodi_language]
 
     if "search_title" not in payload:
-        payload["search_title"] = unicode.encode(payload["title"])
+        log.info("Could not determine search title, falling back to normal title: %s", repr(payload["title"]))
+        payload["search_title"] = payload["title"]
 
     return payload
 
