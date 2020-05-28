@@ -307,7 +307,13 @@ def get_magnet_from_jackett(uri):
             if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
                 return uri
         else:
-            log.warning("Could not get final redirect location for URI %s", original_uri)
+            log.warning("Could not get final redirect location for URI %s. Response was: %d %s", original_uri, response.status_code, response.reason)
+            log.debug("Response for failed redirect %s is", original_uri)
+            log.debug("=" * 50)
+            [log.debug("%s: %s", h, k) for (h, k) in response.headers.iteritems()]
+            log.debug("")
+            log.debug("%s", response.content)
+            log.debug("=" * 50)
             break
 
     return None
