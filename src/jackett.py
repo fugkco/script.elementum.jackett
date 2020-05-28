@@ -55,7 +55,7 @@ def validate_client():
 def search(payload, method="general"):
     payload = parse_payload(method, payload)
 
-    log.debug("Searching with payload (%s): %s" % (method, repr(payload)))
+    log.debug("Searching with payload (%s): %s", method, repr(payload))
 
     p_dialog = xbmcgui.DialogProgressBG()
     p_dialog.create('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32602))
@@ -68,7 +68,7 @@ def search(payload, method="general"):
 
         log.debug("All results: %s" % repr(results))
 
-        log.info("Jackett returned %d results in %s seconds" % (len(results), request_time))
+        log.info("Jackett returned %d results in %s seconds", len(results), request_time)
     finally:
         p_dialog.close()
         del p_dialog

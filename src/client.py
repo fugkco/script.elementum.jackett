@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from urlparse import urljoin
 from xml.etree import ElementTree
 
+import requests
 from elementum.provider import log
 from requests_toolbelt import sessions
 
@@ -259,6 +260,23 @@ class Jackett(object):
 
                 result[json] = val
 
+        # if we didn't get a magnet uri, attempt to resolve the magnet uri.
+        # todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
+        #  So we will resolve it manually for Elementum for now.
+        #  In actuality, this should be fixed within Elementum
+        if result["uri"] is None:
+            link = item.find('link')
+            jackett_uri = ""
+            if link is not None:
+                jackett_uri = link.text
+            else:
+                enclosure = item.find('enclosure')
+                if enclosure is not None:
+                    jackett_uri = enclosure.attrib['url']
+
+            if jackett_uri != "":
+                result["uri"] = get_magnet_from_jackett(jackett_uri)
+
         if result["name"] is None or result["uri"] is None:
             log.warning("Could not parse item; name = %s; uri = %s", result["name"], result["uri"])
             log.debug("Failed item is: %s", ElementTree.tostring(item, encoding='utf8'))
@@ -277,3 +295,19 @@ class Jackett(object):
             result["size"] = human_size(result["_size_bytes"])
 
         return result
+
+
+def get_magnet_from_jackett(uri):
+    magnet_prefix = 'magnet:'
+    original_uri = uri
+    while True:
+        response = requests.get(uri, allow_redirects=False)
+        if response.status_code >= httplib.MULTIPLE_CHOICES and response.status_code < httplib.BAD_REQUEST:
+            uri = response.headers['Location']
+            if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
+                return uri
+        else:
+            log.warning("Could not get final redirect location for URI %s", original_uri)
+            break
+
+    return None
