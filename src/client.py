@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
+import base64
 import httplib
 import re
 import xml.etree.ElementTree as ET
@@ -9,6 +10,7 @@ from xml.etree import ElementTree
 import requests
 from elementum.provider import log
 from requests_toolbelt import sessions
+from torrentool.torrent import Torrent
 
 from src import utils
 from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
@@ -72,7 +74,8 @@ class Jackett(object):
 
         xml = ET.ElementTree(ET.fromstring(caps_resp.content)).getroot()
 
-        self._caps["limits"] = xml.find("limits").attrib
+        # todo handle gracefully, doesn't exist for individual trackers
+        # self._caps["limits"] = xml.find("limits").attrib
 
         self._caps["search_tags"] = {}
         for type_tag in xml.findall('searching/*'):
@@ -297,22 +300,26 @@ class Jackett(object):
         return result
 
 
-def get_magnet_from_jackett(uri):
+def get_magnet_from_jackett(original_uri):
     magnet_prefix = 'magnet:'
-    original_uri = uri
+    uri = original_uri
     while True:
+        if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
+            return uri
+
         response = requests.get(uri, allow_redirects=False)
-        if response.status_code >= httplib.MULTIPLE_CHOICES and response.status_code < httplib.BAD_REQUEST:
+        if response.is_redirect:
             uri = response.headers['Location']
-            if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
-                return uri
+        elif response.status_code == httplib.OK and response.headers.get('Content-Type') == 'application/x-bittorrent':
+            torrent = Torrent.from_string(response.content)
+            return torrent.get_magnet(True)
         else:
             log.warning("Could not get final redirect location for URI %s. Response was: %d %s", original_uri, response.status_code, response.reason)
             log.debug("Response for failed redirect %s is", original_uri)
             log.debug("=" * 50)
             [log.debug("%s: %s", h, k) for (h, k) in response.headers.iteritems()]
             log.debug("")
-            log.debug("%s", response.content)
+            log.debug("%s", base64.standard_b64encode(response.content))
             log.debug("=" * 50)
             break
 

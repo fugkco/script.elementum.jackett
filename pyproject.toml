@@ -9,6 +9,7 @@ license = "WTFPL"
 python = "^2.7"
 requests = "^2.23.0"
 requests-toolbelt = "^0.9.1"
+torrentool = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 kodistubs = "^18.0.0"
