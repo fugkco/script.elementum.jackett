@@ -105,10 +105,14 @@ class Jackett(object):
             "t": "movie",
             "apikey": self._api_key
         }
-        if imdb_id and 'imdbid' in movie_params:
+
+        has_imdb_caps = 'imdbid' in movie_params
+        log.debug("movie search; imdb_id=%s, has_imdb_caps=%s", imdb_id, has_imdb_caps)
+        if imdb_id and has_imdb_caps:
             request_params["imdbid"] = imdb_id
         else:
-            request_params["q"] = title
+            request_params["q"] = title + u' ' + year
+            log.debug("searching movie with query=%s", request_params["q"])
 
         return self._do_search_request(request_params)
 
@@ -142,8 +146,9 @@ class Jackett(object):
             "t": "tvsearch",
             "apikey": self._api_key
         }
-        if imdb_id and 'imdbid' in tv_params:
-            log.debug("searching tv show with imdb id %s", imdb_id)
+        has_imdb_caps = 'imdbid' in tv_params
+        log.debug("movie search; imdb_id=%s, has_imdb_caps=%s", imdb_id, has_imdb_caps)
+        if imdb_id and has_imdb_caps:
             request_params["imdbid"] = imdb_id
         else:
             log.debug("searching tv show with query=%s, season=%s, episode=%s", title, season, episode)
@@ -314,7 +319,8 @@ def get_magnet_from_jackett(original_uri):
             torrent = Torrent.from_string(response.content)
             return torrent.get_magnet(True)
         else:
-            log.warning("Could not get final redirect location for URI %s. Response was: %d %s", original_uri, response.status_code, response.reason)
+            log.warning("Could not get final redirect location for URI %s. Response was: %d %s", original_uri,
+                        response.status_code, response.reason)
             log.debug("Response for failed redirect %s is", original_uri)
             log.debug("=" * 50)
             [log.debug("%s: %s", h, k) for (h, k) in response.headers.iteritems()]

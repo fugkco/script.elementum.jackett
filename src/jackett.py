@@ -7,8 +7,7 @@ Burst processing thread
 import time
 from urlparse import urlparse
 
-import xbmc
-import xbmcgui
+from kodi_six import xbmc, xbmcgui
 from elementum.provider import log
 
 import filter

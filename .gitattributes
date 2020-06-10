@@ -9,9 +9,10 @@
 *.pyi    text diff=python
 
 Makefile                text    export-ignore
-Pipfile                 text    export-ignore
-Pipfile.lock            text    export-ignore -diff
+pyproject.toml          text    export-ignore
+poetry.lock             text    export-ignore -diff
 README.md               text    export-ignore
 setup.cfg               text    export-ignore
-.gitignore              text    export-ignore
 /scripts                        export-ignore
+.gitignore              text    export-ignore
+.gitattributes              text    export-ignore

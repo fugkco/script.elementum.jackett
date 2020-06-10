@@ -15,6 +15,7 @@ torrentool = "^1.0.2"
 kodistubs = "^18.0.0"
 flake8 = "^3.8.2"
 pytest = "^4.6.10"
+kodi-six = {git = "https://github.com/romanvm/kodi.six.git", rev = "0.1.3"}
 
 [build-system]
 requires = ["poetry>=0.12"]

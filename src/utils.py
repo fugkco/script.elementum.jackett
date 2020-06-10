@@ -3,11 +3,9 @@ import os
 import re
 from collections import OrderedDict
 
-import xbmc
-import xbmcaddon
-import xbmcgui
 from elementum.provider import get_setting as original_get_settings
 from elementum.provider import log
+from kodi_six import xbmc, xbmcaddon, xbmcgui
 
 _plugin_setting_prefix = "elementum.jackett."
 
@@ -23,7 +21,7 @@ PATH_TEMP = xbmc.translatePath("special://temp")
 if not ADDON_PATH:
     ADDON_PATH = '..'
 
-#         resolutions['filter_240p'] = [u'240[pр]', u'vhs\-?rip']
+UNKNOWN = 'unknown'
 
 resolutions = OrderedDict([
     ('4k', [r'4k', r'2160[p]', r'uhd', r'4k', r'hd4k']),
@@ -33,7 +31,7 @@ resolutions = OrderedDict([
     ('480p', [r'480[p]', r'xvid', r'dvd', r'dvdrip', r'hdtv', r'web\-(dl)?rip', r'iptv', r'sat\-?rip',
               r'tv\-?rip']),
     ('240p', [r'240[p]', r'vhs\-?rip']),
-    ('unknown', []),
+    (UNKNOWN, []),
 ])
 
 _release_types = OrderedDict([
@@ -54,6 +52,7 @@ _release_types = OrderedDict([
     ('workprint', [r'workprint']),
     ('line', [r'line']),
     ('h26x', [r'x26[45]']),
+    (UNKNOWN, [])
 ])
 
 
@@ -82,11 +81,11 @@ def human_size(nbytes):
 
 
 def get_resolution(name):
-    return _search_re_keys(name, resolutions, "resolution", "unknown")
+    return _search_re_keys(name, resolutions, "resolution", UNKNOWN)
 
 
 def get_release_type(name):
-    return _search_re_keys(name, _release_types, "release type", "unknown")
+    return _search_re_keys(name, _release_types, "release type", UNKNOWN)
 
 
 def _search_re_keys(name, re_dict, log_msg, default=""):

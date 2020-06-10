@@ -2,7 +2,7 @@
 import os
 import sys
 
-import xbmcgui
+from kodi_six import xbmcgui
 from elementum.provider import register, log
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resources', 'libs'))
