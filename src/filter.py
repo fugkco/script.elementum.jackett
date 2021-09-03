@@ -1,7 +1,7 @@
 # coding=utf-8
 from elementum.provider import log
 
-from utils import get_setting, UNKNOWN
+from src.utils import get_setting, UNKNOWN
 
 
 #
@@ -86,6 +86,7 @@ def _should_include_size_result(size, min, max, include_unknown):
 
 
 def size(method, results):
+    log.info("hiii", 50*"-")
     include_unknown = get_setting('size_include_' + UNKNOWN, bool)
 
     if method in ["movie", "season", "episode"]:
@@ -98,6 +99,7 @@ def size(method, results):
     #                        MB     KB      B
     min_size = min_size * (1024 * 1024 * 1024)
     max_size = max_size * (1024 * 1024 * 1024)
+    log.info(results[0]["_size_bytes"])
 
     return [
         result
@@ -109,7 +111,7 @@ def size(method, results):
 def resolution(results):
     filtered = []
     for result in results:
-        log.info("res %s: name=%s; id=%d", result['name'], result['_resolution'], result['resolution'])
+        log.info(f"res {result['name']}: name={result['_resolution']}; id={result['resolution']}")
         if get_setting('include_resolution_' + result["_resolution"], bool):
             filtered.append(result)
 

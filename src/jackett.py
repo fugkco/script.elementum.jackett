@@ -5,15 +5,15 @@ Burst processing thread
 """
 
 import time
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from kodi_six import xbmc, xbmcgui
 from elementum.provider import log
 
-import filter
-import utils
-from client import Jackett
-from utils import get_setting
+from src import filter
+from src import utils
+from src.client import Jackett
+from src.utils import get_setting
 
 available_providers = 0
 special_chars = "()\"':.[]<>/\\?"
@@ -22,7 +22,7 @@ special_chars = "()\"':.[]<>/\\?"
 def get_client():
     host = urlparse(get_setting('host'))
     if host.netloc == '' or host.scheme == '':
-        log.warning("Host %s is invalid. Can't return anything", get_setting('host'))
+        log.warning(f"Host {get_setting('host')} is invalid. Can't return anything")
         utils.notify(utils.translation(32600), image=utils.get_icon_path())
         return None
 
@@ -32,8 +32,8 @@ def get_client():
         utils.notify(utils.translation(32601), image=utils.get_icon_path())
         return None
     else:
-        log.debug("jackett host: %s", host)
-        log.debug("jackett api_key: %s%s%s", api_key[0:2], "*" * 26, api_key[-4:])
+        log.debug(f"jackett host: {host}")
+        log.debug(f"jackett api_key: {api_key[0:2]}{'*' * 26}{api_key[-4:]}")
 
     return Jackett(host=host.geturl(), api_key=api_key)
 
@@ -54,7 +54,7 @@ def validate_client():
 def search(payload, method="general"):
     payload = parse_payload(method, payload)
 
-    log.debug("Searching with payload (%s): %s", method, repr(payload))
+    log.debug(f"Searching with payload ({method}): f{payload}")
 
     p_dialog = xbmcgui.DialogProgressBG()
     p_dialog.create('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32602))
@@ -65,9 +65,9 @@ def search(payload, method="general"):
         request_end_time = time.time()
         request_time = round(request_end_time - request_start_time, 2)
 
-        log.debug("All results: %s" % repr(results))
+        log.debug(f"All results: {results}")
 
-        log.info("Jackett returned %d results in %s seconds", len(results), request_time)
+        log.info(f"Jackett returned {len(results)} results in {request_time} seconds")
     finally:
         p_dialog.close()
         del p_dialog
@@ -90,51 +90,51 @@ def parse_payload(method, payload):
                 },
             }
 
-    payload['titles'] = dict((k.lower(), v) for k, v in payload['titles'].iteritems())
+    payload['titles'] = dict((k.lower(), v) for k, v in list(payload['titles'].items()))
 
     if get_setting('kodi_language', bool):
         kodi_language = xbmc.getLanguage(xbmc.ISO_639_1)
         if not kodi_language:
             log.warning("Kodi returned empty language code...")
         elif kodi_language not in payload.get('titles', {}):
-            log.info("No '%s' translation available..." % kodi_language)
+            log.info(f"No '{kodi_language}' translation available...")
         else:
             payload["search_title"] = payload["titles"][kodi_language]
 
     if "search_title" not in payload:
-        log.info("Could not determine search title, falling back to normal title: %s", repr(payload["title"]))
+        log.info(f"Could not determine search title, falling back to normal title: {payload['title']}")
         payload["search_title"] = payload["title"]
 
     return payload
 
 
 def filter_results(method, results):
-    log.debug("results before filtered: %s", repr(results))
+    log.debug(f"results before filtered: {results}")
 
     if get_setting('filter_keywords_enabled', bool):
         results = filter.keywords(results)
-        log.debug("results after filtering keywords: %s", repr(results))
+        log.debug(f"results after filtering keywords: {results}")
 
     if get_setting('filter_size_enabled', bool):
         results = filter.size(method, results)
-        log.debug("results after filtering size: %s", repr(results))
+        log.debug(f"results after filtering size: {results}")
 
     if get_setting('filter_include_resolution_enabled', bool):
         results = filter.resolution(results)
-        log.debug("results after filtering resolution: %s", repr(results))
+        log.debug(f"results after filtering resolution: {results}")
 
     if get_setting('filter_include_release', bool):
         results = filter.release_type(results)
-        log.debug("results after filtering release type: %s", repr(results))
+        log.debug(f"results after filtering release type: {results}")
 
     if get_setting('filter_exclude_no_seed', bool):
         results = filter.seed(results)
-        log.debug("results after filter no seeds: %s", repr(results))
+        log.debug(f"results after filtering no seeds: {results}")
 
     # todo remove dupes
     # todo maybe rating and codec
 
-    log.debug("results after filtering: %s", repr(results))
+    log.debug(f"results after filtering: {results}")
 
     return results
 
@@ -165,7 +165,7 @@ def search_jackett(payload, method):
         utils.notify(utils.translation(32603), image=utils.get_icon_path())
         return []
 
-    log.debug("Processing %s with Jackett", method)
+    log.debug(f"Processing {method} with Jackett")
     if method == 'movie':
         res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
@@ -175,12 +175,12 @@ def search_jackett(payload, method):
     elif method == 'anime':
         log.warning("jackett provider does not yet support anime search")
         res = []
-        log.info("anime payload=%s", repr(payload))
+        log.info(f"anime payload={payload}")
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
     else:
         res = jackett.search_query(payload["search_title"])
 
-    log.debug("%s search returned %d results", method, len(res))
+    log.debug(f"{method} search returned {len(res)} results")
 
     res = filter_results(method, res)
 

@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resources', 'libs'))
 sys.path.insert(0, os.path.dirname(__file__))
 
 if __name__ == '__main__':
-    from src import debugger, utils
-    from src.jackett import search, validate_client
+    import src.debugger as debugger
+    import src.utils as utils
+    import src.jackett as jackett
 
     if len(sys.argv) == 1:
         log.error("Elementum Jackett plugin must be run through Elementum")
@@ -23,12 +24,12 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if sys.argv[1] == "validate_settings":
-        validate_client()
+        jackett.validate_client()
     else:
         debugger.load()
         register(
-            lambda q: search(q),
-            lambda q: search(q, 'movie'),
-            lambda q: search(q, 'episode'),
-            lambda q: search(q, 'season'),
+            lambda q: jackett.search(q),
+            lambda q: jackett.search(q, 'movie'),
+            lambda q: jackett.search(q, 'episode'),
+            lambda q: jackett.search(q, 'season'),
         )

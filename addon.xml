@@ -2,7 +2,7 @@
 <!-- note version attribute gets changed on the fly using ./scripts/update-version.py -->
 <addon id="script.elementum.jackett" name="Elementum [COLOR FF0291F7]Jackett[/COLOR]" version="0.0.1" provider-name="fugkco">
     <requires>
-        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="xbmc.python" version="3.0.0"/>
         <import addon="plugin.video.elementum"/>
         <import addon="script.module.urllib3"/>
         <import addon="script.module.kodi-six" />
