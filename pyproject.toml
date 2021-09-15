@@ -6,13 +6,13 @@ authors = ["Fugkco <fugkco@github.io>"]
 license = "WTFPL"
 
 [tool.poetry.dependencies]
-python = "^2.7"
-requests = "^2.23.0"
+python = "^3.9.5"
+requests = "^2.25.1"
 requests-toolbelt = "^0.9.1"
 torrentool = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
-kodistubs = "^18.0.0"
+kodistubs = "^19.0.0"
 flake8 = "^3.8.2"
 pytest = "^4.6.10"
 kodi-six = {git = "https://github.com/romanvm/kodi.six.git", rev = "0.1.3"}
