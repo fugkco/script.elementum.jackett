@@ -1,5 +1,6 @@
 # coding=utf-8
 import os
+import xbmcvfs
 import re
 from collections import OrderedDict
 
@@ -16,8 +17,8 @@ ADDON_PATH = ADDON.getAddonInfo("path")
 ADDON_ICON = ADDON.getAddonInfo("icon")
 ADDON_PROFILE = ADDON.getAddonInfo("profile")
 ADDON_VERSION = ADDON.getAddonInfo("version")
-PATH_ADDONS = xbmc.translatePath("special://home/addons/")
-PATH_TEMP = xbmc.translatePath("special://temp")
+PATH_ADDONS = xbmcvfs.translatePath("special://home/addons/")
+PATH_TEMP = xbmcvfs.translatePath("special://temp")
 if not ADDON_PATH:
     ADDON_PATH = '..'
 
