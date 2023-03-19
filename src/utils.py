@@ -1,5 +1,6 @@
 # coding=utf-8
 import os
+import xbmcvfs
 import re
 from collections import OrderedDict
 
@@ -12,12 +13,12 @@ _plugin_setting_prefix = "elementum.jackett."
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo("id")
 ADDON_NAME = ADDON.getAddonInfo("name")
-ADDON_PATH = ADDON.getAddonInfo("path").decode('utf-8')
-ADDON_ICON = ADDON.getAddonInfo("icon").decode('utf-8')
+ADDON_PATH = ADDON.getAddonInfo("path")
+ADDON_ICON = ADDON.getAddonInfo("icon")
 ADDON_PROFILE = ADDON.getAddonInfo("profile")
 ADDON_VERSION = ADDON.getAddonInfo("version")
-PATH_ADDONS = xbmc.translatePath("special://home/addons/")
-PATH_TEMP = xbmc.translatePath("special://temp")
+PATH_ADDONS = xbmcvfs.translatePath("special://home/addons/")
+PATH_TEMP = xbmcvfs.translatePath("special://temp")
 if not ADDON_PATH:
     ADDON_PATH = '..'
 
@@ -76,8 +77,8 @@ def human_size(nbytes):
     while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
-    f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
-    return '{} {}'.format(f, suffixes[i])
+    f = (f"{nbytes:.2f}").rstrip('0').rstrip('.')
+    return f"{f} {suffixes[i]}"
 
 
 def get_resolution(name):
@@ -89,11 +90,11 @@ def get_release_type(name):
 
 
 def _search_re_keys(name, re_dict, log_msg, default=""):
-    for result, search_keys in re_dict.iteritems():
+    for result, search_keys in list(re_dict.items()):
         if bool(re.search(r'\W+(' + "|".join(search_keys) + r')\W*', name, re.IGNORECASE)):
             return result
 
-    log.warning("Could not determine %s from filename '%s'", log_msg, name)
+    log.warning(f"Could not determine {log_msg} from filename '{name}'", log_msg, name)
     return default
 
 

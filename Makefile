@@ -31,8 +31,7 @@ $(ZIP_FILE): $(BUILD_DIR)
 		poetry run pip install \
 			--requirement /dev/stdin \
 			--target $(BUILD_DIR)/resources/libs \
-			--progress-bar off \
-			--install-option="--install-scripts=$$(mktemp -d)"
+			--progress-bar off
 	@find $(BUILD_DIR) -iname "*.egg-info" -or -iname "*.pyo" -or -iname "*.pyc" | xargs rm -rf
 	@poetry run ./scripts/update-version.py $(GIT_VERSION) > $(BUILD_DIR)/addon.xml
 	@(cd $(BUILD_BASE) && $(ZIP) -r $(CURDIR)/$(ZIP_FILE) $(NAME))

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
 import base64
-import httplib
+import http.client as httplib
 import re
 import xml.etree.ElementTree as ET
-from urlparse import urljoin
+from urllib.parse import urljoin
 from xml.etree import ElementTree
 
 import requests
@@ -13,7 +13,7 @@ from requests_toolbelt import sessions
 from torrentool.torrent import Torrent
 
 from src import utils
-from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
+from src.utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
     set_setting
 
 
@@ -59,14 +59,14 @@ class Jackett(object):
 
         if caps_resp.status_code != httplib.OK:
             notify(translation(32700).format(caps_resp.reason), image=get_icon_path())
-            log.error("Jackett return %s", caps_resp.reason)
+            log.error(f"Jackett return {caps_resp.reason}")
             set_setting('settings_validated', caps_resp.reason)
             return
 
         err = self.get_error(caps_resp.content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
-            log.error("got code %s: %s", err["code"], err["description"])
+            log.error(f"got code {err['code']}: {err['description']}")
             set_setting('settings_validated', err["description"])
             return
 
@@ -84,7 +84,7 @@ class Jackett(object):
                 "params": [p for p in type_tag.attrib['supportedParams'].split(",") if p],
             }
 
-        log.info("Found capabilities: %s", repr(self._caps))
+        log.info(f"Found capabilities: {self._caps}")
         # todo maybe categories are needed?
 
     def search_movie(self, title, year, imdb_id):
@@ -97,7 +97,7 @@ class Jackett(object):
             notify(translation(32702).format("movie"), image=get_icon_path())
             log.warning("Jackett has no movie capabilities, please add a indexer that has movie capabilities. "
                         "Falling back to query search...")
-            return self.search_query(title + u' ' + year)
+            return self.search_query(title + ' ' + year)
 
         # todo what values are possible for imdb_id?
         movie_params = movie_search_caps["params"]
@@ -107,12 +107,12 @@ class Jackett(object):
         }
 
         has_imdb_caps = 'imdbid' in movie_params
-        log.debug("movie search; imdb_id=%s, has_imdb_caps=%s", imdb_id, has_imdb_caps)
+        log.debug(f"movie search; imdb_id={imdb_id}, has_imdb_caps={has_imdb_caps}")
         if imdb_id and has_imdb_caps:
             request_params["imdbid"] = imdb_id
         else:
-            request_params["q"] = title + u' ' + year
-            log.debug("searching movie with query=%s", request_params["q"])
+            request_params["q"] = title + ' ' + year
+            log.debug(f"searching movie with query={request_params['q']}")
 
         return self._do_search_request(request_params)
 
@@ -147,11 +147,11 @@ class Jackett(object):
             "apikey": self._api_key
         }
         has_imdb_caps = 'imdbid' in tv_params
-        log.debug("movie search; imdb_id=%s, has_imdb_caps=%s", imdb_id, has_imdb_caps)
+        log.debug(f"movie search; imdb_id={imdb_id}, has_imdb_caps={has_imdb_caps}")
         if imdb_id and has_imdb_caps:
             request_params["imdbid"] = imdb_id
         else:
-            log.debug("searching tv show with query=%s, season=%s, episode=%s", title, season, episode)
+            log.debug(f"searching tv show with query={title}, season={season}, episode={episode}")
             request_params["q"] = title
             if bool(season) and 'season' in tv_params:
                 request_params["season"] = season
@@ -195,24 +195,24 @@ class Jackett(object):
         censored_params = request_params.copy()
         censored_key = censored_params['apikey']
         censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
-        log.debug('Making a request to Jackett using params %s', repr(censored_params))
+        log.debug(f"Making a request to Jackett using params {censored_params}")
 
         search_resp = self._session.get("all/results/torznab", params=request_params)
         if search_resp.status_code != httplib.OK:
             notify(translation(32700).format(search_resp.reason), image=get_icon_path())
-            log.error("Jackett returned %s", search_resp.reason)
+            log.error(f"Jackett returned {search_resp.reason}")
             return []
 
         err = self.get_error(search_resp.content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
-            log.error("got code %s: %s", err["code"], err["description"])
+            log.error(f"got code {err['code']}: {err['description']}")
             return []
 
-        log.debug("Jackett returned below response")
-        log.debug("===============================")
-        log.debug(search_resp.content)
-        log.debug("===============================")
+        # log.debug("Jackett returned below response")
+        # log.debug("===============================")
+        # log.debug(search_resp.content)
+        # log.debug("===============================")
 
         return self._parse_items(search_resp.content)
 
@@ -220,7 +220,7 @@ class Jackett(object):
         results = []
         xml = ET.ElementTree(ET.fromstring(resp_content))
         items = xml.getroot().findall("channel/item")
-        log.info("Found %d items from response", len(items))
+        log.info(f"Found {len(items)} items from response")
         for item in items:
             result = self._parse_item(item)
             if result is not None:
@@ -251,8 +251,6 @@ class Jackett(object):
             attrib = ref.attrib
             if tag == "{" + self._torznab_ns + "}attr":
                 val = attrib["value"]
-                if isinstance(val, str):
-                    val = val.decode("utf-8")
                 if "name" in attrib and "value" in attrib and attrib["name"] and val and \
                         attrib["name"] in self._torznab_elementum_mappings["torznab_attrs"]:
                     json = self._torznab_elementum_mappings["torznab_attrs"][attrib["name"]]
@@ -262,9 +260,6 @@ class Jackett(object):
             if ref.tag in self._torznab_elementum_mappings["tags"] and ref.text is not None:
                 json = self._torznab_elementum_mappings["tags"][ref.tag]
                 val = ref.text.strip()
-
-                if isinstance(val, str):
-                    val = val.decode("utf-8")
 
                 result[json] = val
 
@@ -286,15 +281,15 @@ class Jackett(object):
                 result["uri"] = get_magnet_from_jackett(jackett_uri)
 
         if result["name"] is None or result["uri"] is None:
-            log.warning("Could not parse item; name = %s; uri = %s", result["name"], result["uri"])
-            log.debug("Failed item is: %s", ElementTree.tostring(item, encoding='utf8'))
+            log.warning(f"Could not parse item; name = {result['name']}; uri = {result['uri']}")
+            log.debug(f"Failed item is: {ElementTree.tostring(item, encoding='utf8')}")
             return None
 
         # result["name"] = result["name"].decode("utf-8") # might be needed for non-english items
         result["seeds"] = int(result["seeds"])
         result["peers"] = int(result["peers"])
         resolution = get_resolution(result["name"])
-        result["resolution"] = utils.resolutions.keys()[::-1].index(resolution)
+        result["resolution"] = list(utils.resolutions.keys())[::-1].index(resolution)
         result["_resolution"] = resolution
         result["release_type"] = get_release_type(result["name"])
 
@@ -319,13 +314,14 @@ def get_magnet_from_jackett(original_uri):
             torrent = Torrent.from_string(response.content)
             return torrent.get_magnet(True)
         else:
-            log.warning("Could not get final redirect location for URI %s. Response was: %d %s", original_uri,
-                        response.status_code, response.reason)
-            log.debug("Response for failed redirect %s is", original_uri)
+            log.warning(
+                f"Could not get final redirect location for URI {original_uri}. Response was: {response.status_code} {response.reason}")
+            log.debug(f"Response for failed redirect {original_uri} is")
             log.debug("=" * 50)
-            [log.debug("%s: %s", h, k) for (h, k) in response.headers.iteritems()]
+            for (h, k) in list(response.headers.items()):
+                log.debug(f"{h}: {k}")
             log.debug("")
-            log.debug("%s", base64.standard_b64encode(response.content))
+            log.debug(base64.standard_b64encode(response.content))
             log.debug("=" * 50)
             break
 
