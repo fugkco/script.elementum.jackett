@@ -12,13 +12,10 @@ from elementum.provider import log
 from requests_toolbelt import sessions
 from torrentool.torrent import Torrent
 
-from src import utils
-from src.utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
+import utils
+from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
     set_setting
 
-
-# import logging
-# log = logging
 
 class Jackett(object):
     """docstring for Jackett"""
@@ -209,10 +206,10 @@ class Jackett(object):
             log.error(f"got code {err['code']}: {err['description']}")
             return []
 
-        # log.debug("Jackett returned below response")
-        # log.debug("===============================")
-        # log.debug(search_resp.content)
-        # log.debug("===============================")
+        log.debug("Jackett returned below response")
+        log.debug("===============================")
+        log.debug(search_resp.content)
+        log.debug("===============================")
 
         return self._parse_items(search_resp.content)
 
@@ -285,6 +282,8 @@ class Jackett(object):
             log.debug(f"Failed item is: {ElementTree.tostring(item, encoding='utf8')}")
             return None
 
+        provider_color = utils.get_provider_color(result["provider"])
+
         # result["name"] = result["name"].decode("utf-8") # might be needed for non-english items
         result["seeds"] = int(result["seeds"])
         result["peers"] = int(result["peers"])
@@ -292,10 +291,13 @@ class Jackett(object):
         result["resolution"] = list(utils.resolutions.keys())[::-1].index(resolution)
         result["_resolution"] = resolution
         result["release_type"] = get_release_type(result["name"])
+        result["provider"] = f'[COLOR {provider_color}]{result["provider"]}[/COLOR]'
 
         if result["size"] != "Unknown":
             result["_size_bytes"] = int(result["size"])
             result["size"] = human_size(result["_size_bytes"])
+
+        log.debug("final item: {}".format(result))
 
         return result
 

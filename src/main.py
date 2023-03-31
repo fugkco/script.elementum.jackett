@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-import os
+from os import path
 import sys
 
 from kodi_six import xbmcgui
 from elementum.provider import register, log
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'resources', 'libs'))
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, path.realpath(path.join(path.dirname(__file__), '..', 'resources', 'libs')))
+sys.path.insert(0, path.dirname(__file__))
 
 if __name__ == '__main__':
-    import src.debugger as debugger
-    import src.utils as utils
-    import src.jackett as jackett
+    import debugger
+    import utils
+    import jackett
 
     if len(sys.argv) == 1:
         log.error("Elementum Jackett plugin must be run through Elementum")

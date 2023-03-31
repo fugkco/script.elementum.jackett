@@ -1,4 +1,5 @@
 # coding=utf-8
+import hashlib
 import os
 import xbmcvfs
 import re
@@ -9,6 +10,8 @@ from elementum.provider import log
 from kodi_six import xbmc, xbmcaddon, xbmcgui
 
 _plugin_setting_prefix = "elementum.jackett."
+
+PROVIDER_COLOR_MIN_BRIGHTNESS = 50
 
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo("id")
@@ -104,3 +107,23 @@ def set_setting(key, value):
 
 def get_setting(key, converter=str, choices=None):
     return original_get_settings(_plugin_setting_prefix + key, converter, choices)
+
+
+def get_provider_color(provider_name):
+    hash = hashlib.sha256(provider_name.encode("utf")).hexdigest()
+    colors = []
+
+    spec = 10
+    for i in range(0, 3):
+        offset = spec * i
+        rounded = round(int(hash[offset:offset + spec], 16) / int("F" * spec, 16) * 255)
+        colors.append(int(max(rounded, PROVIDER_COLOR_MIN_BRIGHTNESS)))
+
+    while (sum(colors) / 3) < PROVIDER_COLOR_MIN_BRIGHTNESS:
+        for i in range(0, 3):
+            colors[i] += 10
+
+    for i in range(0, 3):
+        colors[i] = f'{colors[i]:02x}'
+
+    return "FF" + "".join(colors).upper()

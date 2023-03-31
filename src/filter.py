@@ -1,7 +1,7 @@
 # coding=utf-8
 from elementum.provider import log
 
-from src.utils import get_setting, UNKNOWN
+from utils import get_setting, UNKNOWN
 
 
 #
@@ -78,15 +78,7 @@ def keywords(results):
     return results
 
 
-def _should_include_size_result(size, min, max, include_unknown):
-    if size == -1:
-        return include_unknown
-
-    return min <= size <= max
-
-
 def size(method, results):
-    log.info("hiii", 50*"-")
     include_unknown = get_setting('size_include_' + UNKNOWN, bool)
 
     if method in ["movie", "season", "episode"]:
@@ -99,28 +91,22 @@ def size(method, results):
     #                        MB     KB      B
     min_size = min_size * (1024 * 1024 * 1024)
     max_size = max_size * (1024 * 1024 * 1024)
-    log.info(results[0]["_size_bytes"])
 
     return [
         result
         for result in results
-        if _should_include_size_result(result["_size_bytes"], min_size, max_size, include_unknown)
+        if (size == -1 and include_unknown) or (size != -1 and min_size <= result["_size_bytes"] <= max_size)
     ]
 
 
 def resolution(results):
     filtered = []
     for result in results:
-        log.info(f"res {result['name']}: name={result['_resolution']}; id={result['resolution']}")
+        log.debug(f"res {result['name']}: name={result['_resolution']}; id={result['resolution']}")
         if get_setting('include_resolution_' + result["_resolution"], bool):
             filtered.append(result)
 
     return filtered
-    # return [
-    #     result
-    #     for result in results
-    #     if get_setting('include_resolution_' + result["_resolution"], bool)
-    # ]
 
 
 def seed(results):

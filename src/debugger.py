@@ -1,7 +1,7 @@
 # coding=utf-8
 def load():
     from elementum.provider import log
-    from src.utils import get_setting
+    from utils import get_setting
 
     if get_setting("enable_debugger", bool):
         import pkgutil

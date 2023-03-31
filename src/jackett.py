@@ -10,10 +10,9 @@ from urllib.parse import urlparse
 from kodi_six import xbmc, xbmcgui
 from elementum.provider import log
 
-from src import filter
-from src import utils
-from src.client import Jackett
-from src.utils import get_setting
+import filter, utils
+from client import Jackett
+from utils import get_setting
 
 available_providers = 0
 special_chars = "()\"':.[]<>/\\?"

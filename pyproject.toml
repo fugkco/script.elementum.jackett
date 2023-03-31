@@ -2,7 +2,7 @@
 name = "script.elementum.jackett"
 version = "0.0.1"
 description = ""
-authors = ["Fugkco <fugkco@github.io>"]
+authors = ["fugkco <fugkco@users.noreply.github.com>"]
 license = "WTFPL"
 
 [tool.poetry.dependencies]
@@ -16,6 +16,7 @@ kodistubs = "^19.0.0"
 flake8 = "^3.8.2"
 pytest = "^4.6.10"
 kodi-six = {git = "https://github.com/romanvm/kodi.six.git", rev = "0.1.3"}
+elementum = { git = "https://github.com/fugkco/plugin.video.elementum.git" }
 
 [build-system]
 requires = ["poetry>=0.12"]

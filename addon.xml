@@ -7,7 +7,7 @@
         <import addon="script.module.urllib3"/>
         <import addon="script.module.kodi-six" />
     </requires>
-    <extension point="xbmc.python.script" library="jackett.py">
+    <extension point="xbmc.python.script" library="src/main.py">
         <provides>executable</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
