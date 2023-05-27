@@ -117,6 +117,10 @@ def seed(results):
     ]
 
 
+def unique(results):
+    return list({v['info_hash'].tolower(): v for v in results}.values())
+
+
 def release_type(results):
     return [
         result

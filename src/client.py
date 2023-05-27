@@ -1,18 +1,16 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
-import base64
 import http.client as httplib
 import re
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 from xml.etree import ElementTree
 
-import requests
 from elementum.provider import log
 from requests_toolbelt import sessions
-from torrentool.torrent import Torrent
 
 import utils
+import torrent
 from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
     set_setting
 
@@ -164,9 +162,12 @@ class Jackett(object):
 
     def _filter_season(self, results, season):
         season_query = re.escape("{:0>2}".format(season))
+        s_re = re.compile(r'\bS(eason[\s.]?)?' + season_query + r'\b', re.IGNORECASE)
+        ep_re = re.compile(r'\bE(p(isode)?[\s.]?)?\d+\b', re.IGNORECASE)
+
         return [
             result for result in results
-            if re.search(r'\bS(eason )?' + season_query + r'\b', result['name'], re.IGNORECASE)
+            if s_re.search(result['name']) and not ep_re.search(result['name'])
         ]
 
     def search_season(self, title, season, imdb_id):
@@ -275,7 +276,10 @@ class Jackett(object):
                     jackett_uri = enclosure.attrib['url']
 
             if jackett_uri != "":
-                result["uri"] = get_magnet_from_jackett(jackett_uri)
+                result["uri"] = torrent.get_maget(jackett_uri)
+
+        if not result["info_hash"]:
+            result["info_hash"] = torrent.get_info_hash(result['uri'])
 
         if result["name"] is None or result["uri"] is None:
             log.warning(f"Could not parse item; name = {result['name']}; uri = {result['uri']}")
@@ -300,31 +304,3 @@ class Jackett(object):
         log.debug("final item: {}".format(result))
 
         return result
-
-
-def get_magnet_from_jackett(original_uri):
-    magnet_prefix = 'magnet:'
-    uri = original_uri
-    while True:
-        if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
-            return uri
-
-        response = requests.get(uri, allow_redirects=False)
-        if response.is_redirect:
-            uri = response.headers['Location']
-        elif response.status_code == httplib.OK and response.headers.get('Content-Type') == 'application/x-bittorrent':
-            torrent = Torrent.from_string(response.content)
-            return torrent.get_magnet(True)
-        else:
-            log.warning(
-                f"Could not get final redirect location for URI {original_uri}. Response was: {response.status_code} {response.reason}")
-            log.debug(f"Response for failed redirect {original_uri} is")
-            log.debug("=" * 50)
-            for (h, k) in list(response.headers.items()):
-                log.debug(f"{h}: {k}")
-            log.debug("")
-            log.debug(base64.standard_b64encode(response.content))
-            log.debug("=" * 50)
-            break
-
-    return None

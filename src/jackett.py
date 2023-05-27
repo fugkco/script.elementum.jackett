@@ -130,7 +130,9 @@ def filter_results(method, results):
         results = filter.seed(results)
         log.debug(f"results after filtering no seeds: {results}")
 
-    # todo remove dupes
+    results = filter.unique(results)
+    log.debug(f"results after filtering for unique items: {results}")
+
     # todo maybe rating and codec
 
     log.debug(f"results after filtering: {results}")
