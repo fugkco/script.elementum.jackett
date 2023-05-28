@@ -8,11 +8,12 @@
 *.pyz    text diff=python
 *.pyi    text diff=python
 
+.gitattributes              text    export-ignore
+.gitignore              text    export-ignore
+/.github                        export-ignore
+/scripts                        export-ignore
 Makefile                text    export-ignore
-pyproject.toml          text    export-ignore
 poetry.lock             text    export-ignore -diff
+pyproject.toml          text    export-ignore
 README.md               text    export-ignore
 setup.cfg               text    export-ignore
-/scripts                        export-ignore
-.gitignore              text    export-ignore
-.gitattributes              text    export-ignore

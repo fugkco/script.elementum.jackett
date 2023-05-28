@@ -11,7 +11,7 @@
         <provides>executable</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary lang="en">Elementum torrents provider</summary>
+        <summary lang="en">Elementum Jackett provider</summary>
         <description lang="en">Elementum Jackett is a provider that connects Elementum to Jacket. You need to run your own Jackett server.</description>
         <license>WTFPL, Version 2</license>
         <website>https://github.com/fugkco/script.elementum.jackett</website>
