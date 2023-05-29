@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from kodi_six import xbmc, xbmcgui
 from elementum.provider import log
 
+import addon
 import filter, utils
 from client import Jackett
 from utils import get_setting
@@ -44,7 +45,7 @@ def validate_client():
         get_client()
         if get_setting("settings_validated") == "Success":
             utils.notify(utils.translation(32006), image=utils.get_icon_path())
-        utils.ADDON.openSettings()
+        addon.ADDON.openSettings()
     finally:
         p_dialog.close()
         del p_dialog

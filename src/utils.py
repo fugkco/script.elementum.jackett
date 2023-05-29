@@ -1,29 +1,18 @@
 # coding=utf-8
 import hashlib
 import os
-import xbmcvfs
 import re
 from collections import OrderedDict
 
 from elementum.provider import get_setting as original_get_settings
 from elementum.provider import log
-from kodi_six import xbmc, xbmcaddon, xbmcgui
+from kodi_six import xbmcgui
+
+import addon
 
 _plugin_setting_prefix = "elementum.jackett."
 
 PROVIDER_COLOR_MIN_BRIGHTNESS = 50
-
-ADDON = xbmcaddon.Addon()
-ADDON_ID = ADDON.getAddonInfo("id")
-ADDON_NAME = ADDON.getAddonInfo("name")
-ADDON_PATH = ADDON.getAddonInfo("path")
-ADDON_ICON = ADDON.getAddonInfo("icon")
-ADDON_PROFILE = ADDON.getAddonInfo("profile")
-ADDON_VERSION = ADDON.getAddonInfo("version")
-PATH_ADDONS = xbmcvfs.translatePath("special://home/addons/")
-PATH_TEMP = xbmcvfs.translatePath("special://temp")
-if not ADDON_PATH:
-    ADDON_PATH = '..'
 
 UNKNOWN = 'unknown'
 
@@ -61,16 +50,16 @@ _release_types = OrderedDict([
 
 
 def get_icon_path(icon='icon.png'):
-    return os.path.join(ADDON_PATH, 'resources', 'images', icon)
+    return os.path.join(addon.PATH, 'resources', 'images', icon)
 
 
 def translation(id_value):
-    return ADDON.getLocalizedString(id_value)
+    return addon.ADDON.getLocalizedString(id_value)
 
 
 def notify(message, image=None):
     dialog = xbmcgui.Dialog()
-    dialog.notification(ADDON_NAME, message, icon=image, sound=False)
+    dialog.notification(addon.NAME, message, icon=image, sound=False)
     del dialog
 
 
@@ -80,7 +69,7 @@ def human_size(nbytes):
     while nbytes >= 1024 and i < len(suffixes) - 1:
         nbytes /= 1024.
         i += 1
-    f = (f"{nbytes:.2f}").rstrip('0').rstrip('.')
+    f = f"{nbytes:.2f}".rstrip('0').rstrip('.')
     return f"{f} {suffixes[i]}"
 
 
@@ -102,7 +91,7 @@ def _search_re_keys(name, re_dict, log_msg, default=""):
 
 
 def set_setting(key, value):
-    ADDON.setSetting(_plugin_setting_prefix + key, str(value))
+    addon.ADDON.setSetting(_plugin_setting_prefix + key, str(value))
 
 
 def get_setting(key, converter=str, choices=None):

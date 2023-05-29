@@ -6,12 +6,7 @@ import requests
 
 from torf import Torrent, Magnet
 
-try:
-    from elementum.logger import log
-except ModuleNotFoundError:
-    import logging
-
-    log = logging.getLogger(__name__)
+from logger import log
 
 session = requests.Session()
 session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 ' \
