@@ -6,13 +6,15 @@
     <setting label="32002" type="text" id="elementum.jackett.api_key" />
     <setting label="32003" type="text" id="elementum.jackett.settings_validated" default="" enable="false" />
     <setting label="32004" type="action" action="RunScript(script.elementum.jackett, validate_settings)" option="close" />
+    <setting label="32007" type="bool" id="elementum.jackett.search_by_imdb_key"  default="false" />
+    <setting label="32008" id="elementum.jackett.max_results" type="slider" default="20" option="int" range="5,5,200" />
   </category>
 
   <!-- Filtering -->
   <category label="32050">
     <setting label="32051" type="lsep" />
     <setting label="32052" id="elementum.jackett.sort_by" type="enum" lvalues="32053|32054|32055|32056" default="3" />
-    <setting label="32057" id="elementum.jackett.filter_exclude_no_seed" type="bool" default="true" /> <!--todo update language-->
+    <setting label="32057" id="elementum.jackett.filter_exclude_no_seed" type="bool" default="true" />
     <setting label="32058" id="elementum.jackett.search_season_on_episode" type="bool" default="true" />
 
     <setting label="32100" type="lsep"/>

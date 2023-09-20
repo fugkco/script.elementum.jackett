@@ -1,7 +1,9 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
+import os
 import http.client as httplib
 import re
+import concurrent.futures
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 from xml.etree import ElementTree
@@ -103,7 +105,7 @@ class Jackett(object):
 
         has_imdb_caps = 'imdbid' in movie_params
         log.debug(f"movie search; imdb_id={imdb_id}, has_imdb_caps={has_imdb_caps}")
-        if imdb_id and has_imdb_caps:
+        if imdb_id and has_imdb_caps and get_setting('search_by_imdb_key', bool):
             request_params["imdbid"] = imdb_id
         else:
             request_params["q"] = title + ' ' + str(year)
@@ -143,7 +145,7 @@ class Jackett(object):
         }
         has_imdb_caps = 'imdbid' in tv_params
         log.debug(f"movie search; imdb_id={imdb_id}, has_imdb_caps={has_imdb_caps}")
-        if imdb_id and has_imdb_caps:
+        if imdb_id and has_imdb_caps and get_setting('search_by_imdb_key', bool):
             request_params["imdbid"] = imdb_id
         else:
             log.debug(f"searching tv show with query={title}, season={season}, episode={episode}")
@@ -193,7 +195,7 @@ class Jackett(object):
         censored_params = request_params.copy()
         censored_key = censored_params['apikey']
         censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
-        log.debug(f"Making a request to Jackett using params {censored_params}")
+        log.info(f"Making a request to Jackett using params {censored_params}")
 
         search_resp = self._session.get("all/results/torznab", params=request_params)
         if search_resp.status_code != httplib.OK:
@@ -207,7 +209,7 @@ class Jackett(object):
             log.error(f"got code {err['code']}: {err['description']}")
             return []
 
-        log.debug("Jackett returned below response")
+        log.info("Jackett returned response")
         log.debug("===============================")
         log.debug(search_resp.content)
         log.debug("===============================")
@@ -218,13 +220,48 @@ class Jackett(object):
         results = []
         xml = ET.ElementTree(ET.fromstring(resp_content))
         items = xml.getroot().findall("channel/item")
-        log.info(f"Found {len(items)} items from response")
+        log.info(f"Found {len(items)} items from response!")
+
         for item in items:
             result = self._parse_item(item)
             if result is not None:
                 results.append(result)
 
         return results
+    
+
+    # if we didn't get a magnet uri, attempt to resolve the magnet uri.
+    # todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
+    #  So we will resolve it manually for Elementum for now.
+    #  In actuality, this should be fixed within Elementum
+    def asinc_magnet_resolve(self, results, p_dialog):
+        size = len(results)
+        prog_from, prog_to = 20, 90
+        p_dialog.update(prog_from, message = translation(32751).format(size))
+
+        failed, count = 0, 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers= os.cpu_count()*10) as executor:
+            future_to_magnet = {executor.submit(torrent.get_magnet, res["uri"]): res for res in results}
+            for future in concurrent.futures.as_completed(future_to_magnet):
+                count += 1
+                p_dialog.update(round(prog_from + (prog_to-prog_from)*(count/size)))
+                res = future_to_magnet[future]
+                try:
+                    magnet = future.result()
+                except Exception as exc:
+                    log.warning('%r generated an exception: %s' % ('',exc))
+                    failed += 1
+                else:
+                    if not magnet:
+                        continue
+                    log.debug(f"torrent: {res['name']} magnet uri {res['uri']} overided by {magnet}")
+                    res["uri"] = magnet
+                    if not res["info_hash"]:
+                        res["info_hash"] = torrent.get_info_hash(res['uri'])
+
+        log.warning(f"Amount of faled to resolve magnet links: {failed}")
+        return results
+
 
     def _parse_item(self, item):
         result = {
@@ -261,10 +298,6 @@ class Jackett(object):
 
                 result[json] = val
 
-        # if we didn't get a magnet uri, attempt to resolve the magnet uri.
-        # todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
-        #  So we will resolve it manually for Elementum for now.
-        #  In actuality, this should be fixed within Elementum
         if result["uri"] is None:
             link = item.find('link')
             jackett_uri = ""
@@ -276,10 +309,10 @@ class Jackett(object):
                     jackett_uri = enclosure.attrib['url']
 
             if jackett_uri != "":
-                result["uri"] = torrent.get_maget(jackett_uri)
+                result["uri"] = jackett_uri
 
-        if not result["info_hash"]:
-            result["info_hash"] = torrent.get_info_hash(result['uri'])
+        # if not result["info_hash"]:
+        #     result["info_hash"] = torrent.get_info_hash(result['uri'])
 
         if result["name"] is None or result["uri"] is None:
             log.warning(f"Could not parse item; name = {result['name']}; uri = {result['uri']}")

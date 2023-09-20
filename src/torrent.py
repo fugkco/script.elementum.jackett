@@ -6,7 +6,7 @@ import requests
 
 from torf import Torrent, Magnet
 
-from logger import log
+from elementum.provider import log
 
 session = requests.Session()
 session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 ' \
@@ -20,8 +20,11 @@ def get_magnet(original_uri):
     while True:
         if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
             return uri
+        try:
+            response = session.get(uri, allow_redirects=False, timeout=10)
+        except Exception as ex:
+            log.warning(ex)
 
-        response = session.get(uri, allow_redirects=False)
         if response.is_redirect:
             uri = response.headers['Location']
         elif response.status_code == httplib.OK and response.headers.get('Content-Type') == 'application/x-bittorrent':

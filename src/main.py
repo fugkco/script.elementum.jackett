@@ -5,7 +5,7 @@ import sys
 from kodi_six import xbmcgui
 from elementum.provider import register
 
-from logger import log
+from logger import sys_log
 
 sys.path.insert(0, path.realpath(path.join(path.dirname(__file__), '..', 'resources', 'libs')))
 sys.path.insert(0, path.dirname(__file__))
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     import jackett
 
     if len(sys.argv) == 1:
-        log.error("Elementum Jackett plugin must be run through Elementum")
+        sys_log.error("Elementum Jackett plugin must be run through Elementum")
         p_dialog = xbmcgui.Dialog()
         try:
             p_dialog.ok('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32800))

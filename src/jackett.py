@@ -5,6 +5,7 @@ Burst processing thread
 """
 
 import time
+import traceback
 from urllib.parse import urlparse
 
 from kodi_six import xbmc, xbmcgui
@@ -61,13 +62,16 @@ def search(payload, method="general"):
 
     try:
         request_start_time = time.time()
-        results = search_jackett(payload, method)
+        results = search_jackett(payload, method, p_dialog)
         request_end_time = time.time()
         request_time = round(request_end_time - request_start_time, 2)
 
         log.debug(f"All results: {results}")
 
         log.info(f"Jackett returned {len(results)} results in {request_time} seconds")
+    except Exception as exc:
+        utils.notify(utils.translation(32703))
+        log.error(f"Got exeption: {traceback.format_exc()}")
     finally:
         p_dialog.close()
         del p_dialog
@@ -113,30 +117,35 @@ def filter_results(method, results):
 
     if get_setting('filter_keywords_enabled', bool):
         results = filter.keywords(results)
-        log.debug(f"results after filtering keywords: {results}")
+        log.info(f"filtering keywords {len(results)}")
+        log.debug(f"filtering keywords results: {results}")
 
     if get_setting('filter_size_enabled', bool):
         results = filter.size(method, results)
-        log.debug(f"results after filtering size: {results}")
+        log.info(f"filtering size {len(results)}")
+        log.debug(f"filtering size results: {results}")
 
     if get_setting('filter_include_resolution_enabled', bool):
         results = filter.resolution(results)
-        log.debug(f"results after filtering resolution: {results}")
+        log.info(f"filtering resolution {len(results)}")
+        log.debug(f"filtering resolution results: {results}")
 
     if get_setting('filter_include_release', bool):
         results = filter.release_type(results)
-        log.debug(f"results after filtering release type: {results}")
+        log.info(f"filtering release type {len(results)}")
+        log.debug(f"filtering release type {len(results)} results: {results}")
 
     if get_setting('filter_exclude_no_seed', bool):
         results = filter.seed(results)
-        log.debug(f"results after filtering no seeds: {results}")
+        log.info(f"filtering no seeds {len(results)}")
+        log.debug(f"filtering no seeds results: {results}")
 
-    results = filter.unique(results)
-    log.debug(f"results after filtering for unique items: {results}")
+    # results = filter.unique(results)
+    # log.debug(f"filtering for unique items {len(results)} results: {results}")
 
     # todo maybe rating and codec
 
-    log.debug(f"results after filtering: {results}")
+    log.debug(f"after filtering {len(results)} results: {results}")
 
     return results
 
@@ -161,13 +170,14 @@ def sort_results(results):
     return sorted_results
 
 
-def search_jackett(payload, method):
+def search_jackett(payload, method, p_dialog):
     jackett = get_client()
     if jackett is None:
         utils.notify(utils.translation(32603), image=utils.get_icon_path())
         return []
 
     log.debug(f"Processing {method} with Jackett")
+    p_dialog.update(message = "Requesting Jackett server...")
     if method == 'movie':
         res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
@@ -183,7 +193,18 @@ def search_jackett(payload, method):
         res = jackett.search_query(payload["search_title"])
 
     log.debug(f"{method} search returned {len(res)} results")
-
+    p_dialog.update(10, message = utils.translation(32750))
     res = filter_results(method, res)
 
-    return sort_results(res)
+    res = jackett.asinc_magnet_resolve(res, p_dialog)
+
+    p_dialog.update(90, message = utils.translation(32752))
+    res = filter.unique(res)
+    log.info(f"filtering for unique items {len(res)}")
+    log.debug(f"unique items results: {res}")
+
+    p_dialog.update(95, message = utils.translation(32753))
+    res = sort_results(res)
+
+    p_dialog.update(100, message = utils.translation(32754))
+    return res[:get_setting('max_results', int)]
