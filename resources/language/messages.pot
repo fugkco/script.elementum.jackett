@@ -91,6 +91,10 @@ msgctxt "#32058"
 msgid "When looking for an episode, do a secondary search for season"
 msgstr ""
 
+msgctxt "#32059"
+msgid "Use smart filter for shows. Slower but mach better results"
+msgstr ""
+
 msgctxt "#32100"
 msgid "Filter Keywords"
 msgstr ""

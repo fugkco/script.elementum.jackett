@@ -1,6 +1,7 @@
 # coding=utf-8
 from logger import log
 from utils import get_setting, UNKNOWN
+import re
 
 
 #
@@ -126,3 +127,68 @@ def release_type(results):
         for result in results
         if get_setting('include_release_' + result["release_type"], bool)
     ]
+
+
+def tv_season_episode(results, season, season_name, episode, global_ep, ep_year, season_year=0, start_year=0):
+    # Function for sorting large amount of not accurate torrents. Checks year season and episodes.
+    # The filtering shouldn't be strict. I'm trying not to lose suitable torrents.
+    filtered = []
+    for res in results:
+        name = res["name"].lower()
+        # Remove resolution
+        name = re.sub(r"\d+p", '', name)
+        log.debug(f"torrent: {name}")
+
+        if season_name and season_name in name:
+            filtered.append(res)
+            continue
+
+        year_pattern = r"(?P<from>(?:19|20)\d{2})(?:\s*-\s*(?P<to>[12]\d{3}))?"
+        y = re.search(year_pattern, name)
+        if not y:
+            log.debug("No year")
+            continue
+        y_from = int(y.group("from") or "99999")
+        y_to = int(y.group("to") or "-1")
+        if (start_year != y_from and ep_year != y_from and season_year != y_from and
+                (y_from > season_year or season_year > y_to)):
+            log.debug(f"No suitable year: {ep_year or 'none'} || {season_year or 'none'} || {start_year or 'none'}")
+            continue
+        # Remove the year from the text
+        name_no_year = re.sub(year_pattern, '', name)
+
+        if f"s{season}e{episode}" in name_no_year:
+            filtered.append(res)
+            continue
+
+        season_pattern = r"\W(?P<s_flag>s|season|сезон)[\s\(\[\{]*(?P<from>\d+)(?:\s*-\s*(?P<to>\d+))?"
+        s = re.search(season_pattern, name_no_year)
+        if s:
+            s_from = int(s.group("from") or "99999")
+            s_to = int(s.group("to") or "-1")
+            s_flag = s.group("s_flag")
+            if season == s_from or (s_from <= season <= s_to):  # season is suitable
+                filtered.append(res)
+                continue
+            elif s_flag and s_from != 1:  # season is marked but not suitable. If season is first need check episodes
+                log.debug(f"No suitable season: {season or 'none'}")
+                continue
+            # Remove the season from the text
+        else:
+            log.debug("No season found")
+
+        if not global_ep:
+            continue
+        episode_pattern = r"(?:e?(?P<from>\d+)(?:\s*-\s*e?(?P<to>\d+)))|(?P<last>\d+)(?:\s*\+\s*\d*)?(?:\s*(из|of)\s*(?P<all>\d+))"
+        e = re.search(episode_pattern, name_no_year)
+        while e:
+            e_from = int(e.group("from") or "0")
+            e_to = int(e.group("to") or "0")
+            e_last = int(e.group("last") or "0")
+            if (e_from <= global_ep <= e_to) or global_ep <= e_last:
+                filtered.append(res)
+                break
+            name_no_year = re.sub(episode_pattern, '', name_no_year, 1)
+            e = re.search(episode_pattern, name_no_year)
+
+    return filtered

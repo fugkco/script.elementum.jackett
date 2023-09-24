@@ -172,6 +172,9 @@ class Jackett(object):
             if s_re.search(result['name']) and not ep_re.search(result['name'])
         ]
 
+    def search_title(self, title, imdb_id):
+        return self.search_shows(title, imdb_id=imdb_id)
+
     def search_season(self, title, season, imdb_id):
         return self.search_shows(title, season=season, imdb_id=imdb_id)
 

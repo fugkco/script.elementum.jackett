@@ -54,6 +54,7 @@ def validate_client():
 
 
 def search(payload, method="general"):
+    log.info(f"got req from elementum:{payload}")
     payload = parse_payload(method, payload)
 
     log.debug(f"Searching with payload ({method}): f{payload}")
@@ -71,9 +72,9 @@ def search(payload, method="general"):
         log.debug(f"All results: {results}")
 
         log.info(f"Jackett returned {len(results)} results in {request_time} seconds")
-    except Exception as exc:
+    except Exception:
         utils.notify(utils.translation(32703))
-        log.error(f"Got exeption: {traceback.format_exc()}")
+        log.error(f"Got exception: {traceback.format_exc()}")
     finally:
         p_dialog.close()
         del p_dialog
@@ -111,10 +112,12 @@ def parse_payload(method, payload):
         log.info(f"Could not determine search title, falling back to normal title: {payload['title']}")
         payload["search_title"] = payload["title"]
 
+    payload['season_name'] = utils.check_season_name(payload["search_title"], payload.get('season_name', ""))
+
     return payload
 
 
-def filter_results(method, results):
+def filter_results(method, results, season, season_name, episode, global_ep, ep_year, season_year=0, start_year=0):
     log.debug(f"results before filtered: {results}")
 
     if get_setting('filter_keywords_enabled', bool):
@@ -142,9 +145,15 @@ def filter_results(method, results):
         results = filter.seed(results)
         log.debug(f"filtering no seeds results: {results}")
 
+    if method == "episode" and get_setting("use_smart_show_filter", bool):
+        log.info(f"smart-filtering show torrents {len(results)}")
+        results = filter.tv_season_episode(results, season, season_name, episode, global_ep, ep_year, season_year,
+                                           start_year)
+        log.debug(f"smart-filtering show torrents results: {results}")
+
     # todo maybe rating and codec
 
-    log.debug(f"Results resulted in {len(results)} results: {results}")
+    log.debug(f"Resulted in {len(results)} results: {results}")
 
     return results
 
@@ -182,9 +191,13 @@ def search_jackett(p_dialog, payload, method):
     elif method == 'season':
         res = jackett.search_season(payload["search_title"], payload["season"], payload["imdb_id"])
     elif method == 'episode':
-        res = jackett.search_episode(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
+        if get_setting("use_smart_show_filter", bool):
+            res = jackett.search_title(payload["search_title"], payload["imdb_id"])
+        else:
+            res = jackett.search_episode(payload["search_title"], payload["season"], payload["episode"],
+                                         payload["imdb_id"])
     elif method == 'anime':
-        log.warning("jackett provider does not yet support anime search")
+        log.warn("jackett provider does not yet support anime search")
         res = []
         log.info(f"anime payload={payload}")
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
@@ -193,7 +206,9 @@ def search_jackett(p_dialog, payload, method):
 
     log.debug(f"{method} search returned {len(res)} results")
     p_dialog.update(25, message=utils.translation(32750))
-    res = filter_results(method, res)
+    res = filter_results(method, res, payload.get('season', None), payload.get('season_name', ""),
+                         payload.get('episode', None), payload.get('absolute_number', None), payload.get('year', None),
+                         payload.get('season_year', None), payload.get('show_year', None))
 
     res = jackett.async_magnet_resolve(res)
 
