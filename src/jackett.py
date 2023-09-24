@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 from kodi_six import xbmc, xbmcgui
 from elementum.provider import log
 
+
 import addon
 import filter, utils
 from client import Jackett
@@ -53,6 +54,7 @@ def validate_client():
 
 
 def search(payload, method="general"):
+    log.info(f"got req from elementum:{payload}")
     payload = parse_payload(method, payload)
 
     log.debug(f"Searching with payload ({method}): f{payload}")
@@ -113,7 +115,7 @@ def parse_payload(method, payload):
     return payload
 
 
-def filter_results(method, results):
+def filter_results(method, results, season, season_name, episode, global_ep, ep_year, season_year=0, start_year=0):
     log.debug(f"results before filtered: {results}")
 
     if get_setting('filter_keywords_enabled', bool):
@@ -143,6 +145,11 @@ def filter_results(method, results):
 
     # results = filter.unique(results)
     # log.debug(f"filtering for unique items {len(results)} results: {results}")
+
+    if method == "episode" and get_setting("use_smart_show_filter", bool):
+        results = filter.tv_season_episode(results, season, season_name, episode, global_ep, ep_year, season_year, start_year)
+        log.info(f"filtering show torrent {len(results)}")
+        log.debug(f"filtering show torrent results: {results}")
 
     # todo maybe rating and codec
 
@@ -184,9 +191,13 @@ def search_jackett(payload, method, p_dialog):
     elif method == 'season':
         res = jackett.search_season(payload["search_title"], payload["season"], payload["imdb_id"])
     elif method == 'episode':
-        res = jackett.search_episode(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
+        if get_setting("use_smart_show_filter", bool):
+            res = jackett.search_title(payload["search_title"], payload["imdb_id"])
+        else:
+            res = jackett.search_episode(payload["search_title"], payload["season"], payload["episode"],
+                                         payload["imdb_id"])
     elif method == 'anime':
-        log.warning("jackett provider does not yet support anime search")
+        log.warn("jackett provider does not yet support anime search")
         res = []
         log.info(f"anime payload={payload}")
     #     client.search_query(payload["search_title"], payload["season"], payload["episode"], payload["imdb_id"])
@@ -194,18 +205,20 @@ def search_jackett(payload, method, p_dialog):
         res = jackett.search_query(payload["search_title"])
 
     log.debug(f"{method} search returned {len(res)} results")
-    p_dialog.update(10, message = utils.translation(32750))
-    res = filter_results(method, res)
+    p_dialog.update(10, message=utils.translation(32750))
+    res = filter_results(method, res, payload.get('season', None), payload.get('season_name', None),
+                         payload.get('episode', None), payload.get('absolute_number', None), payload.get('year', None),
+                         payload.get('season_year', None), payload.get('show_year', None))
 
     res = jackett.asinc_magnet_resolve(res, p_dialog)
 
-    p_dialog.update(90, message = utils.translation(32752))
+    p_dialog.update(90, message=utils.translation(32752))
     res = filter.unique(res)
     log.info(f"filtering for unique items {len(res)}")
     log.debug(f"unique items results: {res}")
 
-    p_dialog.update(95, message = utils.translation(32753))
+    p_dialog.update(95, message=utils.translation(32753))
     res = sort_results(res)
 
-    p_dialog.update(100, message = utils.translation(32754))
+    p_dialog.update(100, message=utils.translation(32754))
     return res[:get_setting('max_results', int)]

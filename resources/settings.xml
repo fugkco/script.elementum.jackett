@@ -16,6 +16,7 @@
     <setting label="32052" id="elementum.jackett.sort_by" type="enum" lvalues="32053|32054|32055|32056" default="3" />
     <setting label="32057" id="elementum.jackett.filter_exclude_no_seed" type="bool" default="true" />
     <setting label="32058" id="elementum.jackett.search_season_on_episode" type="bool" default="true" />
+    <setting label="32059" id="elementum.jackett.use_smart_show_filter" type="bool" default="true" />
 
     <setting label="32100" type="lsep"/>
     <setting label="32101" id="elementum.jackett.filter_keywords_enabled" type="bool" default="false" />
