@@ -59,7 +59,8 @@ def search(payload, method="general"):
 
     p_dialog = xbmcgui.DialogProgressBG()
     p_dialog.create('Elementum [COLOR FFFF6B00]Jackett[/COLOR]', utils.translation(32602))
-
+    results = []
+    
     try:
         request_start_time = time.time()
         results = search_jackett(payload, method, p_dialog)
