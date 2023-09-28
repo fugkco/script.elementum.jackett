@@ -116,3 +116,10 @@ def get_provider_color(provider_name):
         colors[i] = f'{colors[i]:02x}'
 
     return "FF" + "".join(colors).upper()
+
+
+def check_season_name(title, season_name=""):
+    season_name = season_name.lower()
+    if season_name in title or "season" in season_name:
+        return ""
+    return season_name

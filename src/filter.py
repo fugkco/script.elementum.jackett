@@ -132,14 +132,13 @@ def release_type(results):
 # The filtering shouldn't be strict. I'm trying not to lose suitable torrents.
 def tv_season_episode(results, season, season_name, episode, global_ep, ep_year, season_year=0, start_year=0):
     filtered = []
-    season_name = season_name.lower()
     for res in results:
         name = res["name"].lower()
         # Remove resolution
         name = re.sub("\d+p", '', name)
         log.debug(f"torrent: {name}")
 
-        if season_name and "season" not in season_name and season_name in name:
+        if season_name and season_name in name:
             filtered.append(res)
             continue
 
@@ -171,25 +170,24 @@ def tv_season_episode(results, season, season_name, episode, global_ep, ep_year,
                 filtered.append(res)
                 continue
             elif s_flag and s_from != 1:  # season is marked but not sutable. If first check episodes
-                log.debug(f"No suitable season: {season or 'none'} ")
+                log.debug(f"No suitable season: {season or 'none'}")
                 continue
             # Remove the season from the text
         else:
             log.debug("No season found")
-        name_no_season = re.sub(season_pattern, '', name_no_year)
 
         if not global_ep:
             continue
         episode_pattern = "(?:e?(?P<from>\d+)(?:\s*-\s*e?(?P<to>\d+)))|(?P<last>\d+)(?:\s*\+\s*\d*)?(?:\s*из\s*(?P<all>\d+))"
-        e = re.search(episode_pattern, name_no_season)
-        if not e:
-            log.debug("No episode found")
-            continue
-        e_from = int(e.group("from") or "0")
-        e_to = int(e.group("to") or "0")
-        e_last = int(e.group("last") or "0")
-        if (e_from <= global_ep <= e_to) or global_ep <= e_last:
-            filtered.append(res)
-            continue
+        e = re.search(episode_pattern, name_no_year)
+        while e:
+            e_from = int(e.group("from") or "0")
+            e_to = int(e.group("to") or "0")
+            e_last = int(e.group("last") or "0")
+            if (e_from <= global_ep <= e_to) or global_ep <= e_last:
+                filtered.append(res)
+                break
+            name_no_year = re.sub(episode_pattern, '', name_no_year, 1)
+            e = re.search(episode_pattern, name_no_year)
 
     return filtered

@@ -206,7 +206,8 @@ def search_jackett(payload, method, p_dialog):
 
     log.debug(f"{method} search returned {len(res)} results")
     p_dialog.update(10, message=utils.translation(32750))
-    res = filter_results(method, res, payload.get('season', None), payload.get('season_name', None),
+    season_name = utils.check_season_name(payload["search_title"], payload.get('season_name', ""))
+    res = filter_results(method, res, payload.get('season', None), season_name,
                          payload.get('episode', None), payload.get('absolute_number', None), payload.get('year', None),
                          payload.get('season_year', None), payload.get('show_year', None))
 
