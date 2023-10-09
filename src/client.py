@@ -220,27 +220,25 @@ class Jackett(object):
         results = []
         xml = ET.ElementTree(ET.fromstring(resp_content))
         items = xml.getroot().findall("channel/item")
-        log.info(f"Found {len(items)} items from response!")
-
+        log.info(f"Found {len(items)} items from response")
         for item in items:
             result = self._parse_item(item)
             if result is not None:
                 results.append(result)
 
         return results
-    
 
-    # if we didn't get a magnet uri, attempt to resolve the magnet uri.
-    # todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
+    #  if we didn't get a magnet uri, attempt to resolve the magnet uri.
+    #  todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
     #  So we will resolve it manually for Elementum for now.
     #  In actuality, this should be fixed within Elementum
-    def asinc_magnet_resolve(self, results, p_dialog):
+    def async_magnet_resolve(self, results, p_dialog):
         size = len(results)
         prog_from, prog_to = 20, 90
-        p_dialog.update(prog_from, message = translation(32751).format(size))
+        p_dialog.update(prog_from, message=translation(32751).format(size))
 
         failed, count = 0, 0
-        with concurrent.futures.ThreadPoolExecutor(max_workers= os.cpu_count()*10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()*10) as executor:
             future_to_magnet = {executor.submit(torrent.get_magnet, res["uri"]): res for res in results}
             for future in concurrent.futures.as_completed(future_to_magnet):
                 count += 1
@@ -249,19 +247,18 @@ class Jackett(object):
                 try:
                     magnet = future.result()
                 except Exception as exc:
-                    log.warning('%r generated an exception: %s' % ('',exc))
+                    log.warning('%r generated an exception: %s', res, exc)
                     failed += 1
                 else:
                     if not magnet:
                         continue
-                    log.debug(f"torrent: {res['name']} magnet uri {res['uri']} overided by {magnet}")
+                    log.debug(f"torrent: {res['name']} magnet uri {res['uri']} overridden by {magnet}")
                     res["uri"] = magnet
                     if not res["info_hash"]:
                         res["info_hash"] = torrent.get_info_hash(res['uri'])
 
-        log.warning(f"Amount of faled to resolve magnet links: {failed}")
+        log.warning(f"Failed to resolve {failed} magnet links")
         return results
-
 
     def _parse_item(self, item):
         result = {

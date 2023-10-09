@@ -4,7 +4,7 @@ def load():
     from utils import get_setting
 
     if get_setting("enable_debugger", bool):
-        from logger import sys_log
+        from logger import log
         import pkgutil
         import re
         from os import path
@@ -13,12 +13,12 @@ def load():
         additional_libraries = get_setting("debugger_additional_libraries")
         if additional_libraries != "":
             if not path.exists(additional_libraries):
-                sys_log.error("Debugger has been enabled but additional libraries directory, skipping loading of debugger")
+                log.error("Debugger has been enabled but additional libraries directory, skipping loading of debugger")
                 return
             sys.path.append(additional_libraries)
 
         if pkgutil.find_loader("pydevd_pycharm") is None:
-            sys_log.error("Debugger currently only supports IntelliJ IDEA and derivatives. If you need additional ")
+            log.error("Debugger currently only supports IntelliJ IDEA and derivatives. If you need additional ")
             return
 
         host = get_setting("debugger_host")
@@ -32,19 +32,19 @@ def load():
                     $
         ''', re.VERBOSE)
         if not valid_host_regex.match(host):
-            sys_log.error("debugger: invalid host detected.. Skipping")
+            log.error("debugger: invalid host detected.. Skipping")
             return False
 
         try:
             port = get_setting("debugger_port", int)
         except ValueError:
-            sys_log.exception("debugger: invalid port detected")
+            log.exception("debugger: invalid port detected")
             return
 
         if not (0 < int(port) <= 65535):
-            sys_log.exception("debugger: port must be between 0 and 65535")
+            log.exception("debugger: port must be between 0 and 65535")
             return
 
         import pydevd_pycharm
         pydevd_pycharm.settrace(host, port=port, stdoutToServer=True, stderrToServer=True)
-        sys_log.info("pycharm debugger successfully loaded")
+        log.info("pycharm debugger successfully loaded")

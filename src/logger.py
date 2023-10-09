@@ -4,4 +4,23 @@ from kodi_six import xbmc
 
 import addon
 
-sys_log = logging.getLogger(addon.ID)
+
+class XBMCHandler(logging.StreamHandler):
+    xbmc_levels = {
+        'DEBUG': 0,
+        'INFO': 2,
+        'WARNING': 3,
+        'ERROR': 4,
+        'CRITICAL': 5,
+    }
+
+    def emit(self, record):
+        xbmc_level = self.xbmc_levels.get(record.levelname)
+        xbmc.log(self.format(record), xbmc_level)
+
+
+log = logging.getLogger(addon.ID)
+
+handler = XBMCHandler()
+handler.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
+log.addHandler(handler)

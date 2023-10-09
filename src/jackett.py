@@ -117,28 +117,28 @@ def filter_results(method, results):
     log.debug(f"results before filtered: {results}")
 
     if get_setting('filter_keywords_enabled', bool):
-        results = filter.keywords(results)
         log.info(f"filtering keywords {len(results)}")
+        results = filter.keywords(results)
         log.debug(f"filtering keywords results: {results}")
 
     if get_setting('filter_size_enabled', bool):
-        results = filter.size(method, results)
         log.info(f"filtering size {len(results)}")
+        results = filter.size(method, results)
         log.debug(f"filtering size results: {results}")
 
     if get_setting('filter_include_resolution_enabled', bool):
-        results = filter.resolution(results)
         log.info(f"filtering resolution {len(results)}")
+        results = filter.resolution(results)
         log.debug(f"filtering resolution results: {results}")
 
     if get_setting('filter_include_release', bool):
-        results = filter.release_type(results)
         log.info(f"filtering release type {len(results)}")
-        log.debug(f"filtering release type {len(results)} results: {results}")
+        results = filter.release_type(results)
+        log.debug(f"filtering release type results: {results}")
 
     if get_setting('filter_exclude_no_seed', bool):
-        results = filter.seed(results)
         log.info(f"filtering no seeds {len(results)}")
+        results = filter.seed(results)
         log.debug(f"filtering no seeds results: {results}")
 
     # results = filter.unique(results)
@@ -146,7 +146,7 @@ def filter_results(method, results):
 
     # todo maybe rating and codec
 
-    log.debug(f"after filtering {len(results)} results: {results}")
+    log.debug(f"Results resulted in {len(results)} results: {results}")
 
     return results
 
@@ -178,7 +178,7 @@ def search_jackett(payload, method, p_dialog):
         return []
 
     log.debug(f"Processing {method} with Jackett")
-    p_dialog.update(message = "Requesting Jackett server...")
+    p_dialog.update(message="Requesting Jackett server...")
     if method == 'movie':
         res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
@@ -194,18 +194,18 @@ def search_jackett(payload, method, p_dialog):
         res = jackett.search_query(payload["search_title"])
 
     log.debug(f"{method} search returned {len(res)} results")
-    p_dialog.update(10, message = utils.translation(32750))
+    p_dialog.update(10, message=utils.translation(32750))
     res = filter_results(method, res)
 
-    res = jackett.asinc_magnet_resolve(res, p_dialog)
+    res = jackett.async_magnet_resolve(res, p_dialog)
 
-    p_dialog.update(90, message = utils.translation(32752))
+    p_dialog.update(90, message=utils.translation(32752))
     res = filter.unique(res)
     log.info(f"filtering for unique items {len(res)}")
     log.debug(f"unique items results: {res}")
 
-    p_dialog.update(95, message = utils.translation(32753))
+    p_dialog.update(95, message=utils.translation(32753))
     res = sort_results(res)
 
-    p_dialog.update(100, message = utils.translation(32754))
+    p_dialog.update(100, message=utils.translation(32754))
     return res[:get_setting('max_results', int)]
