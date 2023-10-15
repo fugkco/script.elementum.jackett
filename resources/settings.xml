@@ -6,7 +6,7 @@
     <setting label="32002" type="text" id="elementum.jackett.api_key" />
     <setting label="32003" type="text" id="elementum.jackett.settings_validated" default="" enable="false" />
     <setting label="32004" type="action" action="RunScript(script.elementum.jackett, validate_settings)" option="close" />
-    <setting label="32007" type="bool" id="elementum.jackett.search_by_imdb_key"  default="true" />
+    <setting label="32007" type="bool" id="elementum.jackett.search_by_imdb_key" default="false" />
     <setting label="32008" id="elementum.jackett.max_results" type="slider" default="20" option="int" range="5,5,200" />
   </category>
 

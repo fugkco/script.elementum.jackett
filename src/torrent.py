@@ -3,7 +3,6 @@ import io
 from http import client as httplib
 
 import requests
-
 from torf import Torrent, Magnet
 
 from logger import log

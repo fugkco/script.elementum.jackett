@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from os import path
-import sys
 
-from kodi_six import xbmcgui
+import sys
 from elementum.provider import register
+from kodi_six import xbmcgui
 
 from logger import log
 

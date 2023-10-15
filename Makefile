@@ -2,7 +2,8 @@ NAME = script.elementum.jackett
 GIT = git
 LAST_GIT_TAG = $(shell $(GIT) describe --tags)
 GIT_VERSION = $(shell $(GIT) describe --abbrev=0 --tags --exact-match 2>/dev/null || echo -n "$(LAST_GIT_TAG)-snapshot")
-GIT_TAG_DATE=$(shell $(GIT) log -1 --pretty=format:'%ad' --date=short $(GIT_VERSION))
+GIT_DIFF_VERSION = $(shell $(GIT) describe --abbrev=0 --tags --exact-match 2>/dev/null || echo -n "master")
+GIT_TAG_DATE=$(shell $(GIT) log -1 --pretty=format:'%ad' --date=short $(GIT_DIFF_VERSION))
 
 ZIP = zip
 ZIP_SUFFIX = zip
@@ -29,7 +30,7 @@ deps-dev:
 $(BUILD_BASE)/$(ZIP_FILE): previous_tag=$(shell $(GIT) tag -l | sort -u -r -V | head -n2 | tail -n1)
 $(BUILD_BASE)/$(ZIP_FILE): $(BUILD_DIR) locales
 	$(GIT) archive --format tar --worktree-attributes HEAD | tar -xvf - -C $(BUILD_DIR)
-	$(GIT) log $(previous_tag)...$(GIT_VERSION) --no-merges --pretty=format:' - %s' --reverse | \
+	$(GIT) log $(previous_tag)...$(GIT_DIFF_VERSION) --no-merges --pretty=format:' - %s' --reverse | \
 		poetry run ./scripts/update-version.py $(GIT_VERSION) $(GIT_TAG_DATE) - > $(BUILD_DIR)/addon.xml
 	poetry export -f requirements.txt | \
 		poetry run pip install \

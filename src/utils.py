@@ -4,11 +4,10 @@ import os
 import re
 from collections import OrderedDict
 
-from elementum.provider import get_setting as original_get_settings
-from elementum.provider import log
 from kodi_six import xbmcgui
 
 import addon
+from logger import log
 
 _plugin_setting_prefix = "elementum.jackett."
 
@@ -95,6 +94,7 @@ def set_setting(key, value):
 
 
 def get_setting(key, converter=str, choices=None):
+    from elementum.provider import get_setting as original_get_settings
     return original_get_settings(_plugin_setting_prefix + key, converter, choices)
 
 

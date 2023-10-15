@@ -1,18 +1,19 @@
 #!/usr/bin/env python3.6
 # coding=utf-8
-import os
-import http.client as httplib
-import re
 import concurrent.futures
+import http.client as httplib
+import os
+import re
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin
 from xml.etree import ElementTree
 
-from elementum.provider import log
+from kodi_six import xbmcgui
 from requests_toolbelt import sessions
 
-import utils
 import torrent
+import utils
+from logger import log
 from utils import notify, translation, get_icon_path, human_size, get_resolution, get_release_type, get_setting, \
     set_setting
 
@@ -36,8 +37,9 @@ class Jackett(object):
         }
     }
 
-    def __init__(self, host, api_key):
+    def __init__(self, host, api_key, p_dialog: xbmcgui.DialogProgressBG = None):
         super(Jackett, self).__init__()
+        self.p_dialog = p_dialog
         self._api_key = api_key
         self._caps = {}
 
@@ -100,7 +102,6 @@ class Jackett(object):
         movie_params = movie_search_caps["params"]
         request_params = {
             "t": "movie",
-            "apikey": self._api_key
         }
 
         has_imdb_caps = 'imdbid' in movie_params
@@ -141,7 +142,6 @@ class Jackett(object):
         tv_params = tv_search_caps["params"]
         request_params = {
             "t": "tvsearch",
-            "apikey": self._api_key
         }
         has_imdb_caps = 'imdbid' in tv_params
         log.debug(f"movie search; imdb_id={imdb_id}, has_imdb_caps={has_imdb_caps}")
@@ -185,25 +185,44 @@ class Jackett(object):
             return []
 
         request_params = {
-            "apikey": self._api_key,
             "q": query
         }
 
         return self._do_search_request(request_params)
 
+    def _get_with_progress(self, *args, **kwargs):
+        if not self.p_dialog:
+            r = self._session.get(*args, **kwargs)
+            return r, r.content
+
+        r = self._session.get(stream=True, *args, **kwargs)
+        total_size = int(r.headers.get('content-length', 0))
+        prog_from, prog_to = 0, 25
+        search_resp = b""
+        for chunk in r.iter_content(64 * 1024):
+            if chunk:
+                search_resp += chunk
+                self._update_progress(prog_from, prog_to, len(search_resp), total_size)
+
+        return r, search_resp
+
     def _do_search_request(self, request_params):
-        censored_params = request_params.copy()
+        params = request_params.copy()
+        if "apikey" not in params:
+            params["apikey"] = self._api_key
+
+        censored_params = params.copy()
         censored_key = censored_params['apikey']
         censored_params['apikey'] = "{}{}{}".format(censored_key[0:2], "*" * 26, censored_key[-4:])
         log.info(f"Making a request to Jackett using params {censored_params}")
 
-        search_resp = self._session.get("all/results/torznab", params=request_params)
+        search_resp, content = self._get_with_progress("all/results/torznab", params=params)
         if search_resp.status_code != httplib.OK:
             notify(translation(32700).format(search_resp.reason), image=get_icon_path())
             log.error(f"Jackett returned {search_resp.reason}")
             return []
 
-        err = self.get_error(search_resp.content)
+        err = self.get_error(content)
         if err is not None:
             notify(translation(32700).format(err["description"]), image=get_icon_path())
             log.error(f"got code {err['code']}: {err['description']}")
@@ -211,10 +230,10 @@ class Jackett(object):
 
         log.info("Jackett returned response")
         log.debug("===============================")
-        log.debug(search_resp.content)
+        log.debug(content)
         log.debug("===============================")
 
-        return self._parse_items(search_resp.content)
+        return self._parse_items(content)
 
     def _parse_items(self, resp_content):
         results = []
@@ -232,17 +251,17 @@ class Jackett(object):
     #  todo for some reason Elementum cannot resolve the link that gets proxied through Jackett.
     #  So we will resolve it manually for Elementum for now.
     #  In actuality, this should be fixed within Elementum
-    def async_magnet_resolve(self, results, p_dialog):
+    def async_magnet_resolve(self, results):
         size = len(results)
-        prog_from, prog_to = 20, 90
-        p_dialog.update(prog_from, message=translation(32751).format(size))
+        prog_from, prog_to = 25, 90
+        self.p_dialog.update(prog_from, message=translation(32751).format(size))
 
         failed, count = 0, 0
-        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()*10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count() * 10) as executor:
             future_to_magnet = {executor.submit(torrent.get_magnet, res["uri"]): res for res in results}
             for future in concurrent.futures.as_completed(future_to_magnet):
                 count += 1
-                p_dialog.update(round(prog_from + (prog_to-prog_from)*(count/size)))
+                self._update_progress(prog_from, prog_to, count, size)
                 res = future_to_magnet[future]
                 try:
                     magnet = future.result()
@@ -259,6 +278,12 @@ class Jackett(object):
 
         log.warning(f"Failed to resolve {failed} magnet links")
         return results
+
+    def _update_progress(self, pfrom, pto, current, total):
+        if not self.p_dialog:
+            return
+
+        self.p_dialog.update(int((pfrom + (pto - pfrom) * (current / total)) // 1))
 
     def _parse_item(self, item):
         result = {
