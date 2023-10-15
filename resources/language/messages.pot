@@ -307,6 +307,10 @@ msgctxt "#32603"
 msgid "Unable to connect to Jackett, are your settings correct?"
 msgstr ""
 
+msgctxt "#32604"
+msgid "Requesting results from Jackett server..."
+msgstr ""
+
 msgctxt "#32700"
 msgid "Jackett returned error: {}"
 msgstr ""

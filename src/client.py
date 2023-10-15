@@ -195,9 +195,11 @@ class Jackett(object):
             r = self._session.get(*args, **kwargs)
             return r, r.content
 
+        prog_from, prog_to = 0, 25
+        self._update_progress(prog_from, prog_to, 0, 100)
+
         r = self._session.get(stream=True, *args, **kwargs)
         total_size = int(r.headers.get('content-length', 0))
-        prog_from, prog_to = 0, 25
         search_resp = b""
         for chunk in r.iter_content(64 * 1024):
             if chunk:

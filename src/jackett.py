@@ -176,7 +176,7 @@ def search_jackett(p_dialog, payload, method):
         return []
 
     log.debug(f"Processing {method} with Jackett")
-    p_dialog.update(message="Requesting Jackett server...")
+    p_dialog.update(message=utils.translation(32604))
     if method == 'movie':
         res = jackett.search_movie(payload["search_title"], payload['year'], payload["imdb_id"])
     elif method == 'season':
