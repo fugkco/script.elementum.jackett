@@ -20,8 +20,12 @@ def get_magnet(original_uri):
     while True:
         if len(uri) >= len(magnet_prefix) and uri[0:7] == magnet_prefix:
             return uri
+        try:
+            response = session.get(uri, allow_redirects=False, timeout=10)
+        except requests.exceptions.Timeout as e:
+            log.warning(f"Timeout while resolving torrent {uri}")
+            break
 
-        response = session.get(uri, allow_redirects=False)
         if response.is_redirect:
             uri = response.headers['Location']
         elif response.status_code == httplib.OK and response.headers.get('Content-Type') == 'application/x-bittorrent':

@@ -86,7 +86,7 @@ def _search_re_keys(name, re_dict, log_msg, default=""):
         if bool(re.search(r'\W+(' + "|".join(search_keys) + r')\W*', name, re.IGNORECASE)):
             return result
 
-    log.warning(f"Could not determine {log_msg} from filename '{name}'", log_msg, name)
+    log.warning(f"Could not determine {log_msg} from filename '{name}'")
     return default
 
 

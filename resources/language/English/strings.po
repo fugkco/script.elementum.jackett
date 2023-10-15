@@ -46,6 +46,14 @@ msgctxt "#32006"
 msgid "Successfully connected to Jackett"
 msgstr ""
 
+msgctxt "#32007"
+msgid "Enable search with imdb_id"
+msgstr ""
+
+msgctxt "#32008"
+msgid "Limit torrent count (Faster)"
+msgstr ""
+
 msgctxt "#32050"
 msgid "Filtering"
 msgstr ""
@@ -75,7 +83,7 @@ msgid "Balanced"
 msgstr ""
 
 msgctxt "#32057"
-msgid "Allow results without seeds"
+msgid "Hide torrents without seeds"
 msgstr ""
 
 msgctxt "#32058"
@@ -308,6 +316,30 @@ msgstr ""
 
 msgctxt "#32702"
 msgid "Jackett is unable to search by {}, falling back to query search"
+msgstr ""
+
+msgctxt "#32703"
+msgid "Critical error check log for more info"
+msgstr ""
+
+msgctxt "#32750"
+msgid "Filtering result..."
+msgstr ""
+
+msgctxt "#32751"
+msgid "Resolving {} magnet links..."
+msgstr ""
+
+msgctxt "#32752"
+msgid "Removing dublicates..."
+msgstr ""
+
+msgctxt "#32753"
+msgid "Sorting..."
+msgstr ""
+
+msgctxt "#32754"
+msgid "Returning to Elementum"
 msgstr ""
 
 msgctxt "#32800"
