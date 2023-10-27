@@ -2,6 +2,7 @@
 import hashlib
 import os
 import re
+import itertools
 from collections import OrderedDict
 
 from kodi_six import xbmcgui
@@ -124,3 +125,8 @@ def check_season_name(title, season_name=""):
     if season_name in title or "season" in season_name:
         return ""
     return season_name
+
+
+def concat_list(li):
+    """ converts [[a],[b,c]] to [a, b, c] """
+    return list(itertools.chain.from_iterable(li))
