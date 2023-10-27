@@ -7,9 +7,8 @@ license = "WTFPL"
 
 [tool.poetry.dependencies]
 python = "^3.9.5"
-requests = "^2.31.0"
-requests-toolbelt = "^1.0.0"
 torf = "^4.2.0"
+aiohttp = "^3.8.6"
 
 [tool.poetry.group.dev.dependencies]
 kodistubs = "^19.0.0"
