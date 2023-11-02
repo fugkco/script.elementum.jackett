@@ -6,21 +6,28 @@ import addon
 
 
 class XBMCHandler(logging.StreamHandler):
-    xbmc_levels = {
-        'DEBUG': 0,
-        'INFO': 2,
-        'WARNING': 3,
-        'ERROR': 4,
-        'CRITICAL': 5,
-    }
+    def __init__(self):
+        logging.StreamHandler.__init__(self)
+        formatter = logging.Formatter("[%(name)s] %(message)s")
+        self.setFormatter(formatter)
 
     def emit(self, record):
-        xbmc_level = self.xbmc_levels.get(record.levelname)
-        xbmc.log(self.format(record), xbmc_level)
+        levels = {
+            logging.CRITICAL: xbmc.LOGFATAL,
+            logging.ERROR: xbmc.LOGERROR,
+            logging.WARNING: xbmc.LOGWARNING,
+            logging.INFO: xbmc.LOGINFO,
+            logging.DEBUG: xbmc.LOGDEBUG,
+            logging.NOTSET: xbmc.LOGNONE,
+        }
+        xbmc.log(self.format(record), levels[record.levelno])
+
+    def flush(self):
+        pass
 
 
 log = logging.getLogger(addon.ID)
+log.handlers = []
 
-handler = XBMCHandler()
-handler.setFormatter(logging.Formatter('[%(name)s] %(message)s'))
-log.addHandler(handler)
+log.addHandler(XBMCHandler())
+
