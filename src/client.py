@@ -42,7 +42,7 @@ flags_mapping = {
 }
 
 
-def pars_cap(atr_arr):
+def parse_cap(atr_arr):
     r = Cap(0)
     for atr in atr_arr:
         r |= flags_mapping.get(atr, Cap(0))
@@ -58,9 +58,9 @@ class Indexer:
         self.movie_enabled = root.find("./caps/searching/movie-search").get("available") == "yes"
 
         tv_p = root.find("./caps/searching/tv-search").get("supportedParams").lower().split(",")
-        self.tv_caps = pars_cap(tv_p)
+        self.tv_caps = parse_cap(tv_p)
         movie_p = root.find("./caps/searching/movie-search").get("supportedParams").lower().split(",")
-        self.movie_caps = pars_cap(movie_p)
+        self.movie_caps = parse_cap(movie_p)
 
     def check_t_and_cap(self, t):
         if t == SearchType.MOVIE and self.movie_enabled:
@@ -93,7 +93,7 @@ class JackettClient:
         async with self.session.get(url, params=params) as resp:
             log.debug(f"Indexers request status: {resp.status}")
             if resp.status != HTTPStatus.OK:
-                self.proceed_resp_error(resp.status, resp.message)
+                self.proceed_resp_error(resp.status, await resp.text())
                 return
             response_time = time.monotonic() - start
             body = await resp.text()
@@ -146,7 +146,7 @@ class JackettClient:
         root = await self.send_request(self.query_by_indexer.format(indexer=indexer.id), params)
 
         if not root:
-            return
+            return [], indexer
         torr_list = parse_torrents(root)
         log.info(f"Done searching. Got {len(torr_list)} torrents from {indexer.name}.")
         return torr_list, indexer
@@ -242,8 +242,7 @@ def parse_item(item):
         "info_hash": "",
         "language": None,
 
-        # todo would be nice to assign correct icons but that can be very time consuming due to the number
-        #  of indexers in Jackett
+        # nice to assign correct icons but that can be very time consuming due to the number of indexers in Jackett
         "icon": get_icon_path(),
 
         "_size_bytes": -1
