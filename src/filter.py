@@ -152,7 +152,7 @@ def tv_season_episode(results, season, season_name, episode, global_ep, ep_year,
         y_to = int(y.group("to") or "-1")
         if (start_year != y_from and ep_year != y_from and season_year != y_from and
                 (y_from > season_year or season_year > y_to)):
-            log.debug(f"No suitable year: {ep_year or 'none'} || {season_year or 'none'} || {start_year or 'none'}")
+            log.debug(f"Not suitable year: {ep_year or 'none'} || {season_year or 'none'} || {start_year or 'none'}")
             continue
         # Remove the year from the text
         name_no_year = re.sub(year_pattern, '', name)
@@ -161,7 +161,7 @@ def tv_season_episode(results, season, season_name, episode, global_ep, ep_year,
             filtered.append(res)
             continue
 
-        season_pattern = r"\W(?P<s_flag>s|season|сезон)[\s\(\[\{]*(?P<from>\d+)(?:\s*-\s*(?P<to>\d+))?"
+        season_pattern = r"\W(?P<s_flag>s|season|сезон|tv-?|тв-?)[\s\(\[\{]*(?P<from>\d+)(?:\s*-\s*(?P<to>\d+))?"
         s = re.search(season_pattern, name_no_year)
         if s:
             s_from = int(s.group("from") or "99999")
@@ -171,7 +171,7 @@ def tv_season_episode(results, season, season_name, episode, global_ep, ep_year,
                 filtered.append(res)
                 continue
             elif s_flag and s_from != 1:  # season is marked but not suitable. If season is first need check episodes
-                log.debug(f"No suitable season: {season or 'none'}")
+                log.debug(f"Not suitable season: {season or 'none'}")
                 continue
             # Remove the season from the text
         else:
