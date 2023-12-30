@@ -28,4 +28,4 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${{github.ref_name}}" \
               --generate-notes \
-              build/script.elementum.jackett.zip
+              build/script.elementum.jackett-${{github.ref_name}}.zip
