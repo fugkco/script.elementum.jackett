@@ -127,6 +127,8 @@ def check_season_name(title, season_name=""):
     return season_name
 
 
-def concat_list(li):
-    """ converts [[a],[b,c]] to [a, b, c] """
-    return list(itertools.chain.from_iterable(li))
+def concat_dicts(dicts):
+    d4 = {}
+    for d in dicts:
+        d4.update(d)
+    return d4

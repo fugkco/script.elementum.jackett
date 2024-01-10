@@ -175,7 +175,7 @@ def tv_season_episode(results, season, season_name, episode, global_ep, ep_year,
                 continue
             # Remove the season from the text
         else:
-            log.debug("No season found")
+            log.debug("No season found, it's ok")
 
         if not global_ep:
             continue

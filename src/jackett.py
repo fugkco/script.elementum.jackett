@@ -197,8 +197,9 @@ async def search_jackett(p_dialog, payload, method):
                                            p_dialog_cb=p_dialog.callback(query_weight))
         elif method in ('season', 'episode', 'anime'):
             if get_setting("use_smart_show_filter", bool):
-                res = await j_cli.search_tv(payload["search_title"], imdb_id=payload["imdb_id"],
-                                            p_dialog_cb=p_dialog.callback(query_weight))
+                res = await j_cli.search_tv_smart(payload["search_title"], payload.get('year', None),
+                                                  payload.get('season_year', None), payload.get('show_year', None),
+                                                  p_dialog_cb=p_dialog.callback(query_weight))
             else:
                 res = await j_cli.search_tv(payload["search_title"], season=payload.get("season", None),
                                             ep=payload.get("episode", None), imdb_id=payload["imdb_id"],

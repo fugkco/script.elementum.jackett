@@ -84,6 +84,14 @@ class JackettClient:
         self.indexers = []
         self.session = None
 
+    async def create_session(self, host=None):
+        timeout = aiohttp.ClientTimeout(20)
+        self.session = aiohttp.ClientSession(host or self.host, timeout=timeout)
+
+    async def close_session(self):
+        if not self.session.closed:
+            await self.session.close()
+
     async def send_request(self, url, params=None):
         log.info(f"Sending to Jackett url: {url} params: {params}")
         if params is None:
@@ -99,9 +107,6 @@ class JackettClient:
             body = await resp.text()
 
         log.info(f"Jackett returned response in {response_time:.3f}s size {len(body)} b")
-        log.debug("===============================")
-        log.debug(body)
-        log.debug("===============================")
 
         root = ElT.fromstring(body)
         if root.tag == "error":
@@ -146,7 +151,7 @@ class JackettClient:
         root = await self.send_request(self.query_by_indexer.format(indexer=indexer.id), params)
 
         if not root:
-            return [], indexer
+            return {}, indexer
         torr_list = parse_torrents(root)
         log.info(f"Done searching. Got {len(torr_list)} torrents from {indexer.name}.")
         return torr_list, indexer
@@ -173,8 +178,8 @@ class JackettClient:
 
     async def search_movie(self, title, year=None, imdb_id=None, p_dialog_cb=None):
         tasks = [self.search_by_indexer(ind, SearchType.MOVIE, title, year, imdb_id=imdb_id) for ind in self.indexers]
-        torrent_list = await self.await_indexers(tasks, p_dialog_cb)
-        return utils.concat_list(torrent_list)
+        torrent_dicts = await self.await_indexers(tasks, p_dialog_cb)
+        return utils.concat_dicts(torrent_dicts).values()
 
     async def search_tv(self, title, year=None, season=None, ep=None, imdb_id=None, p_dialog_cb=None):
         tasks = [self.search_by_indexer(ind, SearchType.TV, title, year, season, ep, imdb_id) for ind in
@@ -182,20 +187,24 @@ class JackettClient:
         if get_setting("search_season_on_episode", bool) and bool(season) and bool(ep):
             tasks += [self.search_by_indexer(ind, SearchType.TV, title, year, season, imdb_id=imdb_id) for ind in
                       self.indexers]
-        torrent_list = await self.await_indexers(tasks, p_dialog_cb)
-        return utils.concat_list(torrent_list)
+        torrent_dicts = await self.await_indexers(tasks, p_dialog_cb)
+        return utils.concat_dicts(torrent_dicts).values()
 
     async def search_query(self, title, year=None, imdb_id=None, p_dialog_cb=None):
         tasks = [self.search_by_indexer(ind, SearchType.COMMON, title, year, imdb_id=imdb_id) for ind in self.indexers]
-        torrent_list = await self.await_indexers(tasks, p_dialog_cb)
-        return utils.concat_list(torrent_list)
+        torrent_dicts = await self.await_indexers(tasks, p_dialog_cb)
+        return utils.concat_dicts(torrent_dicts).values()
 
-    async def create_session(self, host=None):
-        self.session = aiohttp.ClientSession(host or self.host)
-
-    async def close_session(self):
-        if not self.session.closed:
-            await self.session.close()
+    async def search_tv_smart(self, title, ep_year=None, season_year=None, show_year=None, p_dialog_cb=None):
+        tasks = [self.search_by_indexer(ind, SearchType.TV, title, None) for ind in self.indexers]
+        if ep_year and ep_year != season_year:
+            tasks += [self.search_by_indexer(ind, SearchType.TV, title, ep_year) for ind in self.indexers]
+        if season_year and season_year != show_year:
+            tasks += [self.search_by_indexer(ind, SearchType.TV, title, season_year) for ind in self.indexers]
+        if show_year:
+            tasks += [self.search_by_indexer(ind, SearchType.TV, title, show_year) for ind in self.indexers]
+        torrent_dicts = await self.await_indexers(tasks, p_dialog_cb)
+        return utils.concat_dicts(torrent_dicts).values()
 
     @staticmethod
     def proceed_resp_error(code, description):
@@ -206,12 +215,12 @@ class JackettClient:
 
 
 def parse_torrents(root):
-    results = []
+    results = {}
     items = root.findall("channel/item")
     for item in items:
         result = parse_item(item)
         if result is not None:
-            results.append(result)
+            results[result['name']] = result
     return results
 
 
