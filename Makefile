@@ -4,10 +4,13 @@ LAST_GIT_TAG = $(shell $(GIT) describe --tags)
 GIT_VERSION = $(shell $(GIT) describe --abbrev=0 --tags --exact-match 2>/dev/null || echo -n "$(LAST_GIT_TAG)-snapshot")
 GIT_DIFF_VERSION = $(shell $(GIT) describe --abbrev=0 --tags --exact-match 2>/dev/null || echo -n "master")
 GIT_TAG_DATE=$(shell $(GIT) log -1 --pretty=format:'%ad' --date=short $(GIT_DIFF_VERSION))
+VER_BY_TAG=$(shell $(GIT) describe --tags --match "v*" --abbrev=0)
+# Remove 'v' character from VER_BY_TAG
+VER=$(shell echo "$(VER_BY_TAG)" | cut -c 2-)
 
 ZIP = zip
 ZIP_SUFFIX = zip
-ZIP_FILE = $(NAME).$(ZIP_SUFFIX)
+ZIP_FILE = $(NAME)-$(VER).$(ZIP_SUFFIX)
 
 BUILD_BASE = build
 BUILD_DIR = $(BUILD_BASE)/$(NAME)

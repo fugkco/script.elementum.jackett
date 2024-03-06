@@ -2,6 +2,7 @@
 import hashlib
 import os
 import re
+import itertools
 from collections import OrderedDict
 
 from kodi_six import xbmcgui
@@ -19,9 +20,9 @@ resolutions = OrderedDict([
     ('4k', [r'4k', r'2160[p]', r'uhd', r'4k', r'hd4k']),
     ('2k', [r'1440[p]', r'2k']),
     ('1080p', [r'1080[ip]', r'1920x1080', r'hd1080p?', r'fullhd', r'fhd', r'blu\W*ray', r'bd\W*remux']),
-    ('720p', [r'720[p]', r'1280x720', r'hd720p?', r'hd\-?rip', r'b[rd]rip']),
-    ('480p', [r'480[p]', r'xvid', r'dvd', r'dvdrip', r'hdtv', r'web\-(dl)?rip', r'iptv', r'sat\-?rip',
-              r'tv\-?rip']),
+    ('720p', [r'720[p]', r'1280x720', r'hd720p?', r'hd\-?rip', r'b[rd]rip', r'xvid', r'dvd', r'dvdrip', r'hdtv',
+              r'web\-(dl)?rip', r'iptv']),
+    ('480p', [r'480[p]', r'sat\-?rip', r'tv\-?rip']),
     ('240p', [r'240[p]', r'vhs\-?rip']),
     (UNKNOWN, []),
 ])
@@ -116,3 +117,18 @@ def get_provider_color(provider_name):
         colors[i] = f'{colors[i]:02x}'
 
     return "FF" + "".join(colors).upper()
+
+
+def check_season_name(title, season_name=""):
+    # make sure season name is unique. Not eq to movie title or "season". It saves from false-positive filtering.
+    season_name = season_name.lower()
+    if season_name in title or "season" in season_name:
+        return ""
+    return season_name
+
+
+def concat_dicts(dicts):
+    d4 = {}
+    for d in dicts:
+        d4.update(d)
+    return d4
