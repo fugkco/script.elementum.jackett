@@ -147,8 +147,11 @@ class JackettClient:
             params["q"] += " S{:0>2}".format(season)
             if bool(ep):
                 params["q"] += "E{:0>2}".format(ep)
-
-        root = await self.send_request(self.query_by_indexer.format(indexer=indexer.id), params)
+        try:
+            root = await self.send_request(self.query_by_indexer.format(indexer=indexer.id), params)
+        except TimeoutError:
+            log.warn(f"Timeout while search {indexer.name}")
+            return {}, indexer
 
         if not root:
             return {}, indexer
