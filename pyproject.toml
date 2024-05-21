@@ -7,7 +7,7 @@ license = "WTFPL"
 
 [tool.poetry.dependencies]
 python = "^3.9.5"
-requests = "^2.31.0"
+requests = "^2.32.0"
 requests-toolbelt = "^1.0.0"
 torf = "^4.2.0"
 
