@@ -335,6 +335,14 @@ msgctxt "#32703"
 msgid "Critical error check log for more info"
 msgstr ""
 
+msgctxt "#32704"
+msgid "Jackett timeout"
+msgstr ""
+
+msgctxt "#32705"
+msgid "Jackett connection error"
+msgstr ""
+
 msgctxt "#32750"
 msgid "Filtering result..."
 msgstr ""

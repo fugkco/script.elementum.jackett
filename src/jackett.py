@@ -60,13 +60,14 @@ async def validate_client():
 
 
 def search(payload, method="general"):
-    log.info(f"got req from elementum:{payload}")
-    payload = parse_payload(method, payload)
-
-    log.debug(f"Searching with payload ({method}): f{payload}")
-    results = []
-    p_dialog = PDialog(utils.translation(32602))
     try:
+        log.info(f"got req from elementum:{payload}")
+        payload = parse_payload(method, payload)
+
+        log.debug(f"Searching with payload ({method}): f{payload}")
+        results = []
+        p_dialog = PDialog(utils.translation(32602))
+
         request_start_time = time.time()
         results = asyncio.run(search_jackett(p_dialog, payload, method))
         request_end_time = time.time()
@@ -112,8 +113,16 @@ def parse_payload(method, payload):
             payload["search_title"] = payload["titles"][kodi_language]
 
     if "search_title" not in payload:
-        log.info(f"Could not determine search title, falling back to normal title: {payload['title']}")
-        payload["search_title"] = payload["title"]
+        log.warn(f"Could not determine search language for title")
+        if utils.is_english(payload['title']):
+            log.info(f"falling back to original_en title: {payload['title']}")
+            payload["search_title"] = payload["title"]
+        elif "en" in payload["titles"]:
+            log.info(f"falling back to not original english title: {payload['titles']['en']}")
+            payload["search_title"] = payload["titles"]["en"]
+        else:
+            log.warn(f"no original english title found. Using: {payload['title']}")
+            payload["search_title"] = payload["title"]
 
     payload['season_name'] = utils.check_season_name(payload["search_title"], payload.get('season_name', ""))
 

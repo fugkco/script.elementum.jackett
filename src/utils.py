@@ -4,6 +4,7 @@ import os
 import re
 import itertools
 from collections import OrderedDict
+from enum import Enum
 
 from kodi_six import xbmcgui
 
@@ -49,8 +50,106 @@ _release_types = OrderedDict([
 ])
 
 
+class MsgID(Enum):
+    JACKETT = 32000
+    HOST = 32001
+    API_KEY = 32002
+    JACKETT_SETTINGS_VALID = 32003
+    VALIDATE_SETTINGS = 32004
+    VALIDATING = 32005
+    SUCCESSFULLY_CONNECTED_TO_JACKETT = 32006
+    ENABLE_SEARCH_WITH_IMDB_ID = 32007
+    LIMIT_TORRENT_COUNT = 32008
+    CONNECTING_TO_JACKETT_FAILED = 32009
+    FILTERING = 32050
+    GENERAL = 32051
+    SORT_RETURNED_RESULTS_BY = 32052
+    RESOLUTION = 32053
+    SEEDS = 32054
+    SIZE = 32055
+    BALANCED = 32056
+    HIDE_TORRENTS_WITHOUT_SEEDS = 32057
+    SECONDARY_SEARCH_FOR_SEASON = 32058
+    USE_SMART_FILTER_FOR_SHOWS = 32059
+    FILTER_KEYWORDS = 32100
+    ENABLE = 32101
+    BLOCK = 32102
+    REQUIRE = 32103
+    FILTER_SIZE = 32150
+    INCLUDE_UNKNOWN_FILE_SIZE = 32152
+    MIN_SIZE_GB = 32153
+    MAX_SIZE_GB = 32154
+    MIN_MOVIE_SIZE_GB = 32155
+    MAX_MOVIE_SIZE_GB = 32156
+    MIN_SEASON_SIZE_GB = 32157
+    MAX_SEASON_SIZE_GB = 32158
+    MIN_EPISODE_SIZE_GB = 32159
+    MAX_EPISODE_SIZE_GB = 32160
+    FILTER_RESOLUTION = 32200
+    RESOLUTION_ENABLE = 32201
+    RESOLUTION_4K = 32202
+    RESOLUTION_2K = 32203
+    RESOLUTION_1080P = 32204
+    RESOLUTION_720P = 32205
+    RESOLUTION_480P = 32206
+    RESOLUTION_240P = 32207
+    RESOLUTION_UNKNOWN = 32208
+    FILTER_RELEASE_TYPE = 32250
+    RELEASE_TYPE_ENABLE = 32251
+    BRRIP_BDRIP_BLURAY = 32252
+    WEBDL_WEBRIP = 32253
+    HDRIP = 32254
+    HDTV = 32255
+    DVDRIP = 32256
+    H26X = 32257
+    DVDSCR = 32258
+    SCREENER_SCR = 32259
+    RELEASE_TYPE_3D = 32260
+    TELE_SYNC_TS_TC = 32261
+    CAM_HDCAM = 32262
+    TVRIP_SATRIP = 32263
+    IPTVRIP = 32264
+    VHSRIP = 32265
+    TRAILER = 32266
+    WORKPRINT = 32267
+    LINE = 32268
+    RELEASE_TYPE_UNKNOWN = 32269
+    ADVANCED = 32300
+    DEBUGGER = 32301
+    ADDITIONAL_LIBRARIES = 32303
+    DEBUGGER_HOST = 32304
+    DEBUGGER_PORT = 32305
+    JACKETT_HOST_INVALID = 32600
+    JACKETT_API_KEY_INVALID = 32601
+    SEARCHING = 32602
+    UNABLE_TO_CONNECT_TO_JACKETT = 32603
+    REQUESTING_RESULTS_FROM_JACKETT = 32604
+    JACKETT_ERROR = 32700
+    UNABLE_TO_DETERMINE_JACKETT_CAPABILITIES = 32701
+    JACKETT_UNABLE_TO_SEARCH = 32702
+    CRITICAL_ERROR = 32703
+    JACKETT_TIMEOUT = 32704
+    JACKETT_CLIENT_ERR = 32705
+    FILTERING_RESULT = 32750
+    RESOLVED_MAGNET_LINKS = 32751
+    WAITING = 32752
+    SORTING = 32753
+    REQUESTS_DONE = 32754
+    RETURNING_TO_ELEMENTUM = 32755
+    ADDON_IS_PROVIDER = 32800
+
+
 def get_icon_path(icon='icon.png'):
     return os.path.join(addon.PATH, 'resources', 'images', icon)
+
+
+def get_localized_string(key: MsgID):
+    """Fetches the localized string for the given key."""
+    if isinstance(key, MsgID):
+        return translation(key.value)
+    else:
+        log.warn(f"'{key}' translation not found. Please fix MsgID enum")
+        return f"'{key}' translation not found"
 
 
 def translation(id_value):
@@ -59,7 +158,7 @@ def translation(id_value):
 
 def notify(message, image=None):
     dialog = xbmcgui.Dialog()
-    dialog.notification(addon.NAME, message, icon=image, sound=False)
+    dialog.notification(addon.NAME, message, icon=image, sound=False, time=5000)
     del dialog
 
 
@@ -132,3 +231,12 @@ def concat_dicts(dicts):
     for d in dicts:
         d4.update(d)
     return d4
+
+
+def is_english(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True

@@ -116,7 +116,17 @@ class JackettClient:
         return root
 
     async def request_indexers(self):
-        root = await self.send_request(self.get_indexers_list)
+        try:
+            root = await self.send_request(self.get_indexers_list)
+        except asyncio.TimeoutError as e:
+            log.warn(f"Request to {self.get_indexers_list} timed out: {e}")
+            utils.notify(utils.get_localized_string(utils.MsgID.JACKETT_TIMEOUT))
+            return
+        except aiohttp.ClientError as e:
+            log.error(f"Request to {self.get_indexers_list} failed with exception: {e}")
+            utils.notify(utils.get_localized_string(utils.MsgID.JACKETT_CLIENT_ERR))
+            return
+
         if not root:
             return
         self.indexers.clear()
@@ -147,10 +157,15 @@ class JackettClient:
             params["q"] += " S{:0>2}".format(season)
             if bool(ep):
                 params["q"] += "E{:0>2}".format(ep)
+
+        url = self.query_by_indexer.format(indexer=indexer.id)
         try:
-            root = await self.send_request(self.query_by_indexer.format(indexer=indexer.id), params)
-        except TimeoutError:
-            log.warn(f"Timeout while search {indexer.name}")
+            root = await self.send_request(url, params)
+        except asyncio.TimeoutError as e:
+            log.warn(f"Request to {url} timed out: {e}")
+            return {}, indexer
+        except aiohttp.ClientError as e:
+            log.error(f"Request to {url} failed with exception: {e}")
             return {}, indexer
 
         if not root:
